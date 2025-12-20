@@ -81,13 +81,13 @@
     {
       "id": "todo",
       "name": "Todo Plugin",
-      "version": "1.0.0",
+      "version": "1.1.0",
       "author": "lonerOrz <lonerOrz@qq.com>",
       "description": "A simple todo list manager plugin for Noctalia Shell.",
       "repository": "https://github.com/noctalia-dev/noctalia-plugins",
       "minNoctaliaVersion": "3.7.1",
       "license": "MIT",
-      "lastUpdated": "2025-12-20T03:18:22+08:00"
+      "lastUpdated": "2025-12-20T22:05:35+08:00"
     },
     {
       "id": "update-count",
