@@ -340,6 +340,7 @@ Item {
                     id: contentInput
                     width: parent.width
                     placeholderText: pluginApi?.tr("panel.editor.content_placeholder") || "Content"
+                    placeholderTextColor: Color.mOnSurfaceVariant
                     text: root.currentNote ? root.currentNote.content : ""
                     wrapMode: TextEdit.Wrap
                     color: Color.mOnSurface
