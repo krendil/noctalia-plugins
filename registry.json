@@ -173,6 +173,17 @@
       "lastUpdated": "2026-01-04T21:11:31-05:00"
     },
     {
+      "id": "rss-feed",
+      "name": "RSS Feed Reader",
+      "version": "1.0.0",
+      "author": "Lokize",
+      "description": "Monitor and read RSS/Atom feeds directly from your desktop",
+      "minNoctaliaVersion": "3.6.0",
+      "license": "MIT",
+      "tags": [],
+      "lastUpdated": "2026-01-06T08:00:55-03:00"
+    },
+    {
       "id": "screen-recorder",
       "name": "Screen Recorder",
       "version": "1.0.2",
