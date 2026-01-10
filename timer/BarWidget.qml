@@ -3,6 +3,8 @@ import QtQuick.Layouts
 import Quickshell
 import qs.Commons
 import qs.Widgets
+import qs.Services.UI
+import qs.Services.System
 
 Rectangle {
   id: root
@@ -80,11 +82,67 @@ Rectangle {
     }
   }
   
+  NPopupContextMenu {
+    id: contextMenu
+
+    model: {
+        var items = [];
+        
+        if (mainInstance) {
+            // Pause / Resume & Reset
+            if (mainInstance.timerRunning || mainInstance.timerElapsedSeconds > 0 || mainInstance.timerRemainingSeconds > 0) {
+                 items.push({
+                    "label": mainInstance.timerRunning ? pluginApi.tr("panel.pause") : pluginApi.tr("panel.resume"),
+                    "action": "toggle",
+                    "icon": mainInstance.timerRunning ? "media-pause" : "media-play"
+                });
+
+                items.push({
+                    "label": pluginApi.tr("panel.reset"),
+                    "action": "reset",
+                    "icon": "refresh"
+                });
+            }
+        }
+        
+        // Settings
+        items.push({
+            "label": pluginApi.tr("panel.settings"),
+            "action": "widget-settings",
+            "icon": "settings"
+        });
+        
+        return items;
+    }
+
+    onTriggered: action => {
+        var popupMenuWindow = PanelService.getPopupMenuWindow(screen);
+        if (popupMenuWindow) {
+            popupMenuWindow.close();
+        }
+
+        if (action === "widget-settings") {
+            BarService.openPluginSettings(screen, pluginApi.manifest);
+        } else if (mainInstance) {
+            if (action === "toggle") {
+                 if (mainInstance.timerRunning) {
+                    mainInstance.timerPause();
+                } else {
+                    mainInstance.timerStart(); 
+                }
+            } else if (action === "reset") {
+                mainInstance.timerReset();
+            }
+        }
+    }
+  }
+
   MouseArea {
     id: mouseArea
     anchors.fill: parent
     hoverEnabled: true
     cursorShape: Qt.PointingHandCursor
+    acceptedButtons: Qt.LeftButton | Qt.RightButton
     
     onEntered: {
         if (!mainInstance || (!mainInstance.timerRunning && !mainInstance.timerSoundPlaying)) {
@@ -98,22 +156,18 @@ Rectangle {
         }
     }
     
-    onClicked: {
-      if (pluginApi) {
-        pluginApi.openPanel(root.screen, root)
+    onClicked: (mouse) => {
+      if (mouse.button === Qt.LeftButton) {
+          if (pluginApi) {
+            pluginApi.openPanel(root.screen, root)
+          }
+      } else if (mouse.button === Qt.RightButton) {
+          var popupMenuWindow = PanelService.getPopupMenuWindow(screen);
+          if (popupMenuWindow) {
+              popupMenuWindow.showContextMenu(contextMenu);
+              contextMenu.openAtItem(root, screen);
+          }
       }
-    }
-    
-    onPressed: (mouse) => {
-        if (mouse.button === Qt.RightButton) {
-            if (mainInstance) {
-                if (mainInstance.timerSoundPlaying) {
-                    mainInstance.timerReset()
-                } else if (mainInstance.timerRunning) {
-                    mainInstance.timerPause()
-                }
-            }
-        }
     }
   }
 }
