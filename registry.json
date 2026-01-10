@@ -77,6 +77,21 @@
       "lastUpdated": "2026-01-07T08:58:45-05:00"
     },
     {
+      "id": "kagi-quick-search",
+      "name": "Kagi Quick Search",
+      "version": "1.0.0",
+      "author": "Kainoa Kanter",
+      "description": "Get AI answers from Kagi in your launcher",
+      "repository": "https://github.com/noctalia-dev/noctalia-plugins",
+      "minNoctaliaVersion": "3.8.3",
+      "license": "MIT",
+      "tags": [
+        "Launcher",
+        "Productivity"
+      ],
+      "lastUpdated": "2026-01-08T18:22:34-08:00"
+    },
+    {
       "id": "kaomoji-provider",
       "name": "Kaomoji Provider",
       "version": "1.0.2",
@@ -142,19 +157,19 @@
     {
       "id": "noctalia-supergfxctl",
       "name": "SuperGFX Control",
-      "version": "0.0.2",
+      "version": "0.0.3",
       "author": "cod3d <cod3ddot@proton.me>",
       "description": "GPU control with supergfxctl for noctalia.",
       "repository": "https://github.com/cod3ddot/noctalia-supergfxctl",
-      "minNoctaliaVersion": "3.7.5",
-      "license": "AGPL-3.0-or-later",
+      "minNoctaliaVersion": "3.8.2",
+      "license": "MIT",
       "tags": [
         "Bar",
         "Panel",
         "System",
         "Gaming"
       ],
-      "lastUpdated": "2026-01-04T21:11:31-05:00"
+      "lastUpdated": "2026-01-07T18:04:16-08:00"
     },
     {
       "id": "privacy-indicator",
@@ -186,7 +201,7 @@
     {
       "id": "screen-recorder",
       "name": "Screen Recorder",
-      "version": "1.0.4",
+      "version": "1.0.6",
       "author": "Noctalia Team",
       "description": "Hardware-accelerated screen recording using gpu-screen-recorder with customizable video and audio settings",
       "repository": "https://github.com/noctalia-dev/noctalia-plugins",
@@ -196,7 +211,7 @@
         "Bar",
         "Utility"
       ],
-      "lastUpdated": "2026-01-07T20:53:27-05:00"
+      "lastUpdated": "2026-01-09T17:16:38+01:00"
     },
     {
       "id": "simple-notes",
@@ -217,13 +232,28 @@
     {
       "id": "steam-price-watcher",
       "name": "Steam Price Watcher",
-      "version": "1.0.1",
+      "version": "1.0.2",
       "author": "Lokize",
       "description": "Monitor Steam game prices and get notified when they reach your target price",
       "minNoctaliaVersion": "3.6.0",
       "license": "MIT",
       "tags": [],
-      "lastUpdated": "2026-01-07T21:51:09-05:00"
+      "lastUpdated": "2026-01-08T08:07:26-03:00"
+    },
+    {
+      "id": "timer",
+      "name": "Timer",
+      "version": "1.0.2",
+      "author": "Noctalia Team",
+      "description": "A timer and stopwatch plugin for the bar & control center.",
+      "repository": "https://github.com/noctalia-dev/noctalia-plugins",
+      "minNoctaliaVersion": "3.6.0",
+      "license": "MIT",
+      "tags": [
+        "Bar",
+        "Utility"
+      ],
+      "lastUpdated": "2026-01-09T19:07:25+01:00"
     },
     {
       "id": "todo",
@@ -245,7 +275,7 @@
     {
       "id": "update-count",
       "name": "Update Count",
-      "version": "1.0.7",
+      "version": "1.0.8",
       "author": "BukoMoon",
       "description": "Checks for system updates and shows the update count. Click to run update command in a terminal.",
       "repository": "https://github.com/noctalia-dev/noctalia-plugins",
@@ -255,19 +285,19 @@
         "Bar",
         "System"
       ],
-      "lastUpdated": "2026-01-04T21:11:31-05:00"
+      "lastUpdated": "2026-01-09T20:02:36-05:00"
     },
     {
       "id": "world-clock",
       "name": "World Clock",
-      "version": "1.0.0",
+      "version": "1.0.1",
       "author": "Lokize",
       "description": "Display time from multiple timezones around the world with automatic rotation.",
       "repository": "https://github.com/noctalia-dev/noctalia-plugins",
       "minNoctaliaVersion": "3.6.0",
       "license": "MIT",
       "tags": [],
-      "lastUpdated": "2026-01-04T19:48:13-03:00"
+      "lastUpdated": "2026-01-07T22:55:41-03:00"
     }
   ]
 }

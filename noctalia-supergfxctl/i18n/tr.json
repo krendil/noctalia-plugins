@@ -1,7 +1,7 @@
 {
   "action": {
     "AsusEgpuDisable": "Önce ASUS eGPU'yu devre dışı bırakın.",
-    "SwitchToIntegrated": "Önce tümleşik GPU'ya geç."
+    "SwitchToIntegrated": "Önce tümleşik GPU'ya geçin."
   },
   "context-menu": {
     "refresh": "Durumu yenile"
@@ -13,20 +13,28 @@
     "Hybrid": "Melez",
     "Integrated": "Entegre",
     "NvidiaNoModeset": "Nvidia modeset yok",
-    "Vfio": "VFIO"
+    "Vfio": "VFIO Geçişi"
   },
   "settings": {
     "debug": {
-      "description": "Konsolda hata ayıklama çıktısı yazdırır.",
+      "description": "Konsola hata ayıklama bilgilerini yazdır.",
       "label": "Hata ayıklama modu"
     },
-    "listenToNotifications": {
-      "description": "rog-control-center bildirimlerini dinle",
-      "label": "Bildirimleri dinle"
+    "rogcc": {
+      "listenToNotifications": {
+        "description": "rog-control-center'dan GPU modu değişiklik bildirimlerine tepki ver.",
+        "label": "Mod değişiklik bildirimlerini dinle"
+      }
     },
-    "polling": {
-      "description": "supergfxctl işleminin yoklanmasını etkinleştir/devre dışı bırak",
-      "label": "Anket"
+    "supergfxctl": {
+      "patchPending": {
+        "description": "supergfxctl çıktısına güvenmek yerine gerekli eylemi tahmin edin.",
+        "label": "Tahmin yedek eylemi"
+      },
+      "polling": {
+        "description": "Sürekli olarak supergfxctl sürecini durum güncellemeleri için yoklayın. Uyarı: Bu, supergfxctl'nin kilitlenmesine neden olabilir!",
+        "label": "Anket"
+      }
     }
   },
   "unknown": "Bilinmiyor"

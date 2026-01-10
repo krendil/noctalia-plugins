@@ -1,109 +1,109 @@
 {
-  "widget": {
-    "title": "GitHub Feed",
-    "tooltip": {
-      "loading": "Loading...",
-      "configure": "Click to configure",
-      "events": "{count} events",
-      "updated": "Updated {time} ago",
-      "refresh": "Right-click to refresh"
-    }
+  "events": {
+    "closed": "closed",
+    "commented": "commented on",
+    "created": "created",
+    "forked": "forked",
+    "merged": "merged",
+    "opened": "opened",
+    "pushedTo": "pushed to",
+    "released": "released",
+    "starred": "starred"
   },
   "panel": {
-    "title": "GitHub Feed",
-    "refresh": "Refresh feed",
     "close": "Close",
     "empty": {
-      "title": "No events yet",
-      "description": "Your GitHub activity feed is empty"
+      "description": "Your GitHub activity feed is empty",
+      "title": "No events yet"
     },
     "error": {
-      "title": "Failed to load feed",
-      "retry": "Retry"
+      "retry": "Retry",
+      "title": "Failed to load feed"
     },
-    "noUsername": {
-      "title": "No username configured",
-      "description": "Configure your GitHub username in the plugin settings to see your feed"
-    },
-    "loading": "Loading feed...",
     "footer": {
       "events": "{count} events",
       "updated": "Updated {time}"
-    }
-  },
-  "events": {
-    "starred": "starred",
-    "forked": "forked",
-    "pushedTo": "pushed to",
-    "opened": "opened",
-    "closed": "closed",
-    "merged": "merged",
-    "created": "created",
-    "released": "released",
-    "commented": "commented on"
+    },
+    "loading": "Loading feed...",
+    "noUsername": {
+      "description": "Configure your GitHub username in the plugin settings to see your feed",
+      "title": "No username configured"
+    },
+    "refresh": "Refresh feed",
+    "title": "GitHub Feed"
   },
   "settings": {
     "account": "Account",
-    "username": {
-      "label": "GitHub Username",
-      "description": "Your GitHub username to fetch activity feed",
-      "placeholder": "e.g., linuxmobile"
-    },
-    "token": {
-      "label": "Personal Access Token (Optional)",
-      "description": "Increases rate limit from 60 to 5000 requests/hour",
-      "placeholder": "ghp_xxxxxxxxxxxx"
-    },
-    "refresh": {
-      "title": "Refresh Settings",
-      "interval": {
-        "label": "Refresh Interval",
-        "description": "Check for new events every {minutes} minutes"
+    "behavior": {
+      "openInBrowser": {
+        "description": "Click on events to open them in your default browser",
+        "label": "Open in Browser"
       },
-      "maxEvents": {
-        "label": "Maximum Events",
-        "description": "Show up to {count} events in the feed"
-      }
+      "title": "Behavior"
     },
     "eventTypes": {
-      "title": "Event Types",
       "description": "Choose which events to display in your feed",
-      "stars": {
-        "label": "Stars",
-        "description": "Show when repos are starred"
-      },
       "forks": {
-        "label": "Forks",
-        "description": "Show when repos are forked"
-      },
-      "prs": {
-        "label": "Pull Requests",
-        "description": "Show PR activity"
+        "description": "Show when repos are forked",
+        "label": "Forks"
       },
       "issues": {
-        "label": "Issues",
-        "description": "Show issue activity"
+        "description": "Show issue activity",
+        "label": "Issues"
+      },
+      "prs": {
+        "description": "Show PR activity",
+        "label": "Pull Requests"
       },
       "pushes": {
-        "label": "Pushes",
-        "description": "Show push events (can be noisy)"
-      }
+        "description": "Show push events (can be noisy)",
+        "label": "Pushes"
+      },
+      "stars": {
+        "description": "Show when repos are starred",
+        "label": "Stars"
+      },
+      "title": "Event Types"
     },
-    "behavior": {
-      "title": "Behavior",
-      "openInBrowser": {
-        "label": "Open in Browser",
-        "description": "Click on events to open them in your default browser"
-      }
+    "refresh": {
+      "interval": {
+        "description": "Check for new events every {minutes} minutes",
+        "label": "Refresh Interval"
+      },
+      "maxEvents": {
+        "description": "Show up to {count} events in the feed",
+        "label": "Maximum Events"
+      },
+      "title": "Refresh Settings"
     },
-    "saved": "GitHub Feed settings saved"
+    "saved": "GitHub Feed settings saved",
+    "token": {
+      "description": "Increases rate limit from 60 to 5000 requests/hour",
+      "label": "Personal Access Token (Optional)",
+      "placeholder": "ghp_xxxxxxxxxxxx"
+    },
+    "username": {
+      "description": "Your GitHub username to fetch activity feed",
+      "label": "GitHub Username",
+      "placeholder": "e.g., linuxmobile"
+    }
   },
   "time": {
-    "justNow": "just now",
-    "minutesAgo": "{count} min ago",
+    "daysAgo": "{count} day ago",
+    "daysAgo_plural": "{count} days ago",
     "hoursAgo": "{count} hour ago",
     "hoursAgo_plural": "{count} hours ago",
-    "daysAgo": "{count} day ago",
-    "daysAgo_plural": "{count} days ago"
+    "justNow": "just now",
+    "minutesAgo": "{count} min ago"
+  },
+  "widget": {
+    "title": "GitHub Feed",
+    "tooltip": {
+      "configure": "Click to configure",
+      "events": "{count} events",
+      "loading": "Loading...",
+      "refresh": "Right-click to refresh",
+      "updated": "Updated {time} ago"
+    }
   }
 }

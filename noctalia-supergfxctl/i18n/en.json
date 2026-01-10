@@ -1,7 +1,7 @@
 {
   "action": {
-    "AsusEgpuDisable": "Disable ASUS eGPU first",
-    "SwitchToIntegrated": "Switch to integrated gpu first"
+    "AsusEgpuDisable": "Disable ASUS eGPU first.",
+    "SwitchToIntegrated": "Switch to integrated GPU first."
   },
   "context-menu": {
     "refresh": "Refresh status"
@@ -13,20 +13,28 @@
     "Hybrid": "Hybrid",
     "Integrated": "Integrated",
     "NvidiaNoModeset": "Nvidia no modeset",
-    "Vfio": "VFIO"
+    "Vfio": "VFIO Passthrough"
   },
   "settings": {
     "debug": {
-      "description": "Prints debug output in console",
+      "description": "Print debug information to the console.",
       "label": "Debug mode"
     },
-    "listenToNotifications": {
-      "description": "Listen to rog-control-center notifications",
-      "label": "Listen to notifications"
+    "rogcc": {
+      "listenToNotifications": {
+        "description": "React to GPU mode change notifications from rog-control-center.",
+        "label": "Listen for mode change notifications"
+      }
     },
-    "polling": {
-      "description": "Enable/disable polling of supergfxctl process",
-      "label": "Polling"
+    "supergfxctl": {
+      "patchPending": {
+        "description": "Guess the required action instead of relying on the output of supergfxctl.",
+        "label": "Guess fallback action"
+      },
+      "polling": {
+        "description": "Periodically poll the supergfxctl process for status updates. Warning: this can cause supergfxctl to hang!",
+        "label": "Polling"
+      }
     }
   },
   "unknown": "Unknown"

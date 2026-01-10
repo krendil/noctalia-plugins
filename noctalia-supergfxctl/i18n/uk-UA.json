@@ -1,32 +1,40 @@
 {
   "action": {
-    "AsusEgpuDisable": "Спочатку вимкніть ASUS eGPU.",
-    "SwitchToIntegrated": "Спочатку перемкніться на інтегровану відеокарту."
+    "AsusEgpuDisable": "Спочатку вимкните ASUS eGPU.",
+    "SwitchToIntegrated": "Спочатку перемкните на інтегровану відеокарту."
   },
   "context-menu": {
-    "refresh": "Оновити статус"
+    "refresh": "Оновити стан"
   },
-  "gpu": "Графічний процесор",
+  "gpu": "Відеокарта",
   "mode": {
     "AsusEgpu": "Asus eGPU",
     "AsusMuxDgpu": "Asus MUX dGPU",
     "Hybrid": "Гібрид",
-    "Integrated": "Інтегрований",
-    "NvidiaNoModeset": "Nvidia no modeset",
-    "Vfio": "VFIO"
+    "Integrated": "Інтегрована",
+    "NvidiaNoModeset": "NVIDIA без modeset",
+    "Vfio": "VFIO Passthrough"
   },
   "settings": {
     "debug": {
-      "description": "Виводить налагоджувальну інформацію в консоль.",
+      "description": "Виводить доп. інформацію в консоль.",
       "label": "Режим налагодження"
     },
-    "listenToNotifications": {
-      "description": "Слухати сповіщення rog-control-center",
-      "label": "Слухати сповіщення"
+    "rogcc": {
+      "listenToNotifications": {
+        "description": "Реагувати на сповіщення про зміну режиму відеокарти від rog-control-center.",
+        "label": "Слухати сповіщення про зміну режиму"
+      }
     },
-    "polling": {
-      "description": "Увімкнути/вимкнути опитування процесу supergfxctl",
-      "label": "Опитування"
+    "supergfxctl": {
+      "patchPending": {
+        "description": "Вгадувати необхідну дію замість використання виводу supergfxctl.",
+        "label": "Вгадувати дію"
+      },
+      "polling": {
+        "description": "Періодично опитувати supergfxctl для оновлення стану.",
+        "label": "Опитування"
+      }
     }
   },
   "unknown": "Невідомо"

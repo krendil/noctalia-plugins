@@ -14,64 +14,143 @@ ColumnLayout {
     id: root
 
     // noctalia plugin api, injected dynamically
-    property var pluginApi: null
-    readonly property var pluginCore: pluginApi?.mainInstance
+    property QtObject pluginApi: null
+    readonly property QtObject pluginSettings: pluginApi?.mainInstance.pluginSettings
 
     spacing: Style.marginM
 
+    // https://github.com/noctalia-dev/noctalia-shell/blob/main/Widgets/NText.qml
+    NText {
+        text: "ROG Control Center"
+        color: Color.mSecondary
+
+        Layout.topMargin: Style.marginM
+        Layout.bottomMargin: Style.marginM
+    }
+
+    RowLayout {
+        // https://github.com/noctalia-dev/noctalia-shell/blob/main/Widgets/NIcon.qml
+        NIcon {
+            icon: "barrier-block"
+            pointSize: Style.fontSizeL
+            color: Color.mTertiary
+        }
+
+        // https://github.com/noctalia-dev/noctalia-shell/blob/main/Widgets/NToggle.qml
+        NToggle {
+            Layout.fillWidth: true
+            // TODO: enable once implemented
+            enabled: false
+            label: root.pluginApi.tr("settings.rogcc.listenToNotifications.label")
+            description: root.pluginApi.tr("settings.rogcc.listenToNotifications.description")
+            checked: root.pluginSettings.rogcc.listenToNotifications
+            onToggled: checked => root.pluginSettings.rogcc.listenToNotifications = checked
+        }
+    }
+
+    RowLayout {
+        Layout.fillWidth: true
+
+        // https://github.com/noctalia-dev/noctalia-shell/blob/main/Widgets/NText.qml
+        NText {
+            text: "supergfxctl"
+            color: Color.mSecondary
+            Layout.topMargin: Style.marginM
+            Layout.bottomMargin: Style.marginM
+        }
+
+        NDivider {
+            Layout.fillWidth: true
+        }
+    }
+
+    // https://github.com/noctalia-dev/noctalia-shell/blob/main/Widgets/NToggle.qml
+    NToggle {
+        Layout.fillWidth: true
+        label: root.pluginApi.tr("settings.supergfxctl.patchPending.label")
+        description: root.pluginApi.tr("settings.supergfxctl.patchPending.description")
+        checked: root.pluginSettings.supergfxctl.patchPending
+        onToggled: checked => root.pluginSettings.supergfxctl.patchPending = checked
+    }
+
+    RowLayout {
+        // https://github.com/noctalia-dev/noctalia-shell/blob/main/Widgets/NIcon.qml
+        NIcon {
+            icon: "flask"
+            pointSize: Style.fontSizeL
+            color: Color.mTertiary
+        }
+
+        // https://github.com/noctalia-dev/noctalia-shell/blob/main/Widgets/NToggle.qml
+        NToggle {
+            Layout.fillWidth: true
+            label: root.pluginApi.tr("settings.supergfxctl.polling.label")
+            description: root.pluginApi.tr("settings.supergfxctl.polling.description")
+            checked: root.pluginSettings.supergfxctl.polling
+            onToggled: checked => root.pluginSettings.supergfxctl.polling = checked
+        }
+    }
+
+    NValueSlider {
+        isSettings: true
+        text: root.pluginSettings.supergfxctl.pollingInterval + "ms"
+        enabled: root.pluginSettings.supergfxctl.polling
+        from: 1000
+        to: 5000
+        stepSize: 250
+        value: root.pluginSettings.supergfxctl.pollingInterval
+        onMoved: value => root.pluginSettings.supergfxctl.pollingInterval = value
+    }
+
+    RowLayout {
+        Layout.fillWidth: true
+
+        // https://github.com/noctalia-dev/noctalia-shell/blob/main/Widgets/NText.qml
+        NText {
+            text: "Miscellaneous"
+            color: Color.mSecondary
+            Layout.topMargin: Style.marginM
+            Layout.bottomMargin: Style.marginM
+        }
+
+        NDivider {
+            Layout.fillWidth: true
+        }
+    }
+
+    // https://github.com/noctalia-dev/noctalia-shell/blob/main/Widgets/NToggle.qml
     NToggle {
         Layout.fillWidth: true
         label: root.pluginApi.tr("settings.debug.label")
         description: root.pluginApi.tr("settings.debug.description")
-        checked: root.pluginCore.pluginSettings.debug
-        onToggled: checked => root.pluginCore.pluginSettings.debug = checked
-    }
-
-    NToggle {
-        Layout.fillWidth: true
-        // TODO: enable once implemented
-        enabled: false
-        label: root.pluginApi.tr("settings.listenToNotifications.label")
-        description: root.pluginApi.tr("settings.listenToNotifications.description")
-        checked: root.pluginCore.pluginSettings.listenToNotifications
-        onToggled: checked => root.pluginCore.pluginSettings.listenToNotifications = checked
-    }
-
-    NToggle {
-        Layout.fillWidth: true
-        // TODO: enable once implemented
-        enabled: false
-        label: root.pluginApi.tr("settings.polling.label")
-        description: root.pluginApi.tr("settings.polling.description")
-        checked: root.pluginCore.pluginSettings.polling
-        onToggled: checked => root.pluginCore.pluginSettings.polling = checked
-    }
-
-    NValueSlider {
-        Layout.fillWidth: true
-        text: root.pluginCore.pluginSettings.pollingInterval + "ms"
-        // TODO: enable once implemented
-        // enabled: root.pluginCore.pluginSettings.polling
-        enabled: false
-        from: 1000
-        to: 5000
-        stepSize: 250
-        value: root.pluginCore.pluginSettings.pollingInterval
-        onMoved: root.pluginCore.pluginSettings.pollingInterval = value
+        checked: root.pluginSettings.debug
+        onToggled: checked => root.pluginSettings.debug = checked
     }
 
     // This function is called by noctalia dialog
     function saveSettings(): void {
-        if (!pluginApi) {
-            return root.pluginCore?.error("cannot save settings: pluginApi is null");
+        if (!root.pluginSettings) {
+            return console.error("supergfxctl", "[Settings]: plugin core (Main.qml) is not loaded");
         }
 
-        root.pluginApi.pluginSettings.debug = root.pluginCore.pluginSettings.debug;
-        root.pluginApi.pluginSettings.polling = root.pluginCore.pluginSettings.polling;
-        root.pluginApi.pluginSettings.pollingInterval = root.pluginCore.pluginSettings.pollingInterval;
-        root.pluginApi.pluginSettings.listenToNotifications = root.pluginCore.pluginSettings.listenToNotifications;
+        if (!root.pluginApi) {
+            return console.error("supergfxctl", "[Settings]: cannot save settings: pluginApi is null");
+        }
 
-        // Persists to disk
+        // TODO: move to pluginCore.pluginSettings
+        root.pluginApi.pluginSettings = {
+            debug: root.pluginSettings.debug,
+            rogcc: {
+                listenToNotifications: root.pluginSettings.rogcc.listenToNotifications
+            },
+            supergfxctl: {
+                patchPending: root.pluginSettings.supergfxctl.patchPending,
+                polling: root.pluginSettings.supergfxctl.polling,
+                pollingInterval: root.pluginSettings.supergfxctl.pollingInterval
+            }
+        };
+
+        // Persist to disk
         root.pluginApi.saveSettings();
 
         root.pluginCore?.log("saved settings");

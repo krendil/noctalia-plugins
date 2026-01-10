@@ -14,7 +14,22 @@ Item {
     property bool isPending: false
     property bool hasActiveRecording: false
     property string outputPath: ""
-    property bool isAvailable: ProgramCheckerService.gpuScreenRecorderAvailable
+    property bool isAvailable: false
+
+    // Single reusable Process object
+    Process {
+        id: checker
+        running: true
+        command: ["sh", "-c", "command -v gpu-screen-recorder >/dev/null 2>&1 || (command -v flatpak >/dev/null 2>&1 && flatpak list --app | grep -q 'com.dec05eba.gpu_screen_recorder')"]
+
+        onExited: function (exitCode) {
+            isAvailable = (exitCode === 0);
+            running = false;
+        }
+
+        stdout: StdioCollector {}
+        stderr: StdioCollector {}
+    }
 
     IpcHandler {
         target: "plugin:screen-recorder"
@@ -51,13 +66,22 @@ Item {
     readonly property string audioSource: pluginApi?.pluginSettings?.audioSource || "default_output"
     readonly property string videoSource: pluginApi?.pluginSettings?.videoSource || "portal"
 
-    // Update availability when ProgramCheckerService completes its checks
-    Connections {
-        target: ProgramCheckerService
-        function onChecksCompleted() {
-            root.isAvailable = ProgramCheckerService.gpuScreenRecorderAvailable
+    function buildTooltip() {
+        if (!isAvailable) {
+            return pluginApi.tr("messages.not-installed")
         }
+
+        if (isPending) {
+            pluginApi.tr("messages.started")
+        }
+
+        if (isRecording) {
+            return pluginApi.tr("messages.stop-recording")
+        }
+
+        return pluginApi.tr("messages.start-recording")
     }
+
 
     // Start or Stop recording
     function toggleRecording() {
@@ -105,7 +129,7 @@ Item {
         var now = new Date()
         
         // Known Qt date/time format tokens sorted by length (longest first to match greedily)
-        var tokens = ['MMMM', 'dddd', 'yyyy', 'MMM', 'ddd', 'zzz', 'HH', 'hh', 'mm', 'ss', 
+        var tokens = ['unix', 'MMMM', 'dddd', 'yyyy', 'MMM', 'ddd', 'zzz', 'HH', 'hh', 'mm', 'ss', 
                       'yy', 'MM', 'dd', 'AP', 'ap', 'M', 'd', 'H', 'h', 'm', 's', 'z', 'A', 'a', 't'];
         
         // Escape literal text by wrapping non-token sequences in single quotes
@@ -136,8 +160,16 @@ Item {
                         escaped += "'" + literalBuffer + "'";
                         literalBuffer = "";
                     }
-                    // Add the token as-is
-                    escaped += token;
+
+                    if (token === 'unix') {
+                        // Replace 'unix' token with the actual timestamp literal
+                        // Do not wrap in quotes to avoid creating '' sequences which are interpreted as escaped quotes
+                        escaped += Math.floor(now.getTime() / 1000);
+                    } else {
+                        // Add other tokens as-is
+                        escaped += token;
+                    }
+
                     i += token.length;
                     matched = true;
                     break;
@@ -211,7 +243,7 @@ Item {
             return
         }
 
-        ToastService.showNotice(I18n.tr("toast.recording.stopping"), outputPath, "settings-screen-recorder")
+        ToastService.showNotice(pluginApi.tr("messages.stopping"), outputPath, "video")
 
         Quickshell.execDetached(["sh", "-c", "pkill -SIGINT -f 'gpu-screen-recorder' || pkill -SIGINT -f 'com.dec05eba.gpu_screen_recorder'"])
 
@@ -258,7 +290,7 @@ Item {
 
                 // Check if gpu-screen-recorder is not installed
                 if (stdout === "GPU_SCREEN_RECORDER_NOT_INSTALLED") {
-                    ToastService.showError(I18n.tr("toast.recording.not-installed"), I18n.tr("toast.recording.not-installed-desc"))
+                    ToastService.showError(pluginApi.tr("messages.not-installed"), pluginApi.tr("messages.not-installed-desc"))
                     return
                 }
 
@@ -266,8 +298,8 @@ Item {
                 // But don't show error if user intentionally cancelled via portal
                 if (exitCode !== 0) {
                     if (stderr.length > 0 && !wasCancelled) {
-                        ToastService.showError(I18n.tr("toast.recording.failed-start"), truncateForToast(stderr))
-                        Logger.e("GPUScreenRecorder", stderr)
+                        ToastService.showError(pluginApi.tr("messages.failed-start"), truncateForToast(stderr))
+                        Logger.e("ScreenRecorder", stderr)
                     }
                 }
             } else if (isRecording || hasActiveRecording) {
@@ -275,7 +307,7 @@ Item {
                 isRecording = false
                 monitorTimer.running = false
                 if (exitCode === 0) {
-                    ToastService.showNotice(I18n.tr("toast.recording.saved"), outputPath, "settings-screen-recorder")
+                    ToastService.showNotice(pluginApi.tr("messages.saved"), outputPath, "video")
                     if (copyToClipboard) {
                         copyFileToClipboard(outputPath)
                     }
@@ -283,17 +315,17 @@ Item {
                     // Don't show error if user intentionally cancelled
                     if (!wasCancelled) {
                         if (stderr.length > 0) {
-                            ToastService.showError(I18n.tr("toast.recording.failed-start"), truncateForToast(stderr))
-                            Logger.e("GPUScreenRecorder", stderr)
+                            ToastService.showError(pluginApi.tr("messages.failed-start"), truncateForToast(stderr))
+                            Logger.e("ScreenRecorder", stderr)
                         } else {
-                            ToastService.showError(I18n.tr("toast.recording.failed-start"), I18n.tr("toast.recording.failed-general"))
+                            ToastService.showError(pluginApi.tr("messages.failed-start"), pluginApi.tr("messages.failed-general"))
                         }
                     }
                 }
                 hasActiveRecording = false
             } else if (!isPending && exitCode === 0 && outputPath) {
                 // Fallback: if process exited successfully with an outputPath, handle it
-                ToastService.showNotice(I18n.tr("toast.recording.saved"), outputPath, "settings-screen-recorder")
+                ToastService.showNotice(pluginApi.tr("messages.saved"), outputPath, "video")
                 if (copyToClipboard) {
                     copyFileToClipboard(outputPath)
                 }
@@ -311,7 +343,7 @@ Item {
             } else {
                 isPending = false
                 hasActiveRecording = false
-                ToastService.showError(I18n.tr("toast.recording.no-portals"), I18n.tr("toast.recording.no-portals-desc"))
+                ToastService.showError(pluginApi.tr("messages.no-portals"), pluginApi.tr("messages.no-portals-desc"))
             }
         }
     }
@@ -321,7 +353,7 @@ Item {
         id: copyToClipboardProcess
         onExited: function (exitCode, exitStatus) {
             if (exitCode !== 0) {
-                Logger.e("GPUScreenRecorder", "Failed to copy file to clipboard, exit code:", exitCode)
+                Logger.e("ScreenRecorder", "Failed to copy file to clipboard, exit code:", exitCode)
             }
         }
     }

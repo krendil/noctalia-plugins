@@ -1,33 +1,41 @@
 {
   "action": {
-    "AsusEgpuDisable": "Fais désactiver l'eGPU ASUS en premier.",
-    "SwitchToIntegrated": "Wechseln Sie zuerst zur integrierten GPU."
+    "AsusEgpuDisable": "Deaktiver først ASUS eGPU.",
+    "SwitchToIntegrated": "Esegui prima il passaggio alla GPU integrata."
   },
   "context-menu": {
-    "refresh": "Ripristina stato"
+    "refresh": "I-refresh ang status"
   },
   "gpu": "GPU",
   "mode": {
     "AsusEgpu": "Asus eGPU",
     "AsusMuxDgpu": "Asus MUX dGPU",
-    "Hybrid": "Hibrid",
-    "Integrated": "Integriert",
-    "NvidiaNoModeset": "Nvidia kein Modeset",
-    "Vfio": "VFIO"
+    "Hybrid": "Ibrido",
+    "Integrated": "Integrato",
+    "NvidiaNoModeset": "Nvidia walang modeset",
+    "Vfio": "Trasferimento diretto VFIO"
   },
   "settings": {
     "debug": {
-      "description": "Tulostaa debuggaustulosteen konsoliin",
-      "label": "Modo de depuración"
+      "description": "Stampa informazioni di debug sulla console.",
+      "label": "Modalità debug"
     },
-    "listenToNotifications": {
-      "description": "Pamati sa mga pahibalo sa rog-control-center",
-      "label": "Slušajte obavijesti"
+    "rogcc": {
+      "listenToNotifications": {
+        "description": "Reagisci alle notifiche di cambio modalità GPU da rog-control-center.",
+        "label": "Ascolta le notifiche di cambio modalità"
+      }
     },
-    "polling": {
-      "description": "Aktiviere/deaktiviere das Abfragen des supergfxctl-Prozesses",
-      "label": "Anketimi"
+    "supergfxctl": {
+      "patchPending": {
+        "description": "Indovina l'azione richiesta invece di affidarti all'output di supergfxctl.",
+        "label": "Azione di fallback predefinita"
+      },
+      "polling": {
+        "description": "Anfrage den Supergfxctl-Prozess periodisch nach Statusaktualisierungen. Warnung: Dies kann dazu führen, dass sich Supergfxctl aufhängt!",
+        "label": "Pagboto"
+      }
     }
   },
-  "unknown": "Nekonata"
+  "unknown": "Hindi alam"
 }

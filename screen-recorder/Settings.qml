@@ -89,20 +89,20 @@ ColumnLayout {
         Logger.i("ScreenRecorder", "Settings saved successfully")
     }
     NTextInputButton {
-        label: I18n.tr("panels.screen-recorder.general-output-folder-label")
-        description: I18n.tr("panels.screen-recorder.general-output-folder-description")
+        label: pluginApi.tr("settings.general.output-folder")
+        description: pluginApi.tr("settings.general.output-folder-description")
         placeholderText: Quickshell.env("HOME") + "/Videos"
         text: root.editDirectory
         buttonIcon: "folder-open"
-        buttonTooltip: I18n.tr("panels.screen-recorder.general-output-folder-label")
+        buttonTooltip: pluginApi.tr("settings.general.output-folder")
         onInputEditingFinished: root.editDirectory = text
         onButtonClicked: folderPicker.openFilePicker()
     }
 
     // Filename Pattern
     NTextInput {
-        label: pluginApi?.tr("settings.filename_pattern.label") || "Filename pattern"
-        description: pluginApi?.tr("settings.filename_pattern.description") || "Pattern for generated filenames. Supported: yyyy, yy, MM, M, dd, d, HH, H, mm, m, ss, s (e.g., mycool-recording_yyyyMMdd_HHmmss)"
+        label: pluginApi?.tr("settings.filename-pattern.label") || "Filename pattern"
+        description: pluginApi?.tr("settings.filename-pattern.description") || "Pattern for generated filenames. Supported: yyyy, yy, MM, M, dd, d, HH, H, mm, m, ss, s (e.g., mycool-recording_yyyyMMdd_HHmmss)"
         placeholderText: "recording_yyyyMMdd_HHmmss"
         text: root.editFilenamePattern
         onTextChanged: root.editFilenamePattern = text
@@ -115,8 +115,8 @@ ColumnLayout {
 
     // Show Cursor
     NToggle {
-        label: I18n.tr("panels.screen-recorder.general-show-cursor-label")
-        description: I18n.tr("panels.screen-recorder.general-show-cursor-description")
+        label: pluginApi.tr("settings.general.show-cursor")
+        description: pluginApi.tr("settings.general.show-cursor-description")
         checked: root.editShowCursor
         onToggled: root.editShowCursor = checked
         defaultValue: pluginApi?.manifest?.metadata?.defaultSettings?.showCursor ?? true
@@ -124,8 +124,8 @@ ColumnLayout {
 
     // Copy to Clipboard
     NToggle {
-        label: I18n.tr("panels.screen-recorder.general-copy-to-clipboard-label")
-        description: I18n.tr("panels.screen-recorder.general-copy-to-clipboard-description")
+        label: pluginApi.tr("settings.general.copy-to-clipboard")
+        description: pluginApi.tr("settings.general.copy-to-clipboard-description")
         checked: root.editCopyToClipboard
         onToggled: root.editCopyToClipboard = checked
         defaultValue: pluginApi?.manifest?.metadata?.defaultSettings?.copyToClipboard ?? false
@@ -142,16 +142,16 @@ ColumnLayout {
 
         // Source
         NComboBox {
-            label: I18n.tr("panels.screen-recorder.video-video-source-label")
-            description: I18n.tr("panels.screen-recorder.video-video-source-description")
+            label: pluginApi.tr("settings.video.source")
+            description: pluginApi.tr("settings.video.source-desc")
             model: [
                 {
                     "key": "portal",
-                    "name": I18n.tr("options.screen-recording.sources-portal")
+                    "name": pluginApi.tr("settings.video.sources-portal")
                 },
                 {
                     "key": "screen",
-                    "name": I18n.tr("options.screen-recording.sources-screen")
+                    "name": pluginApi.tr("settings.video.sources-screen")
                 }
             ]
             currentKey: root.editVideoSource
@@ -161,36 +161,36 @@ ColumnLayout {
 
         // Frame Rate
         NComboBox {
-            label: I18n.tr("panels.audio.media-frame-rate-label")
-            description: I18n.tr("panels.screen-recorder.video-frame-rate-description")
+            label: pluginApi.tr("settings.video.frame-rate")
+            description: pluginApi.tr("settings.video.frame-rate-desc")
             model: [
                 {
                     "key": "30",
-                    "name": I18n.tr("options.frame-rates-fps", {"fps": "30"})
+                    "name": "30 FPS"
                 },
                 {
                     "key": "60",
-                    "name": I18n.tr("options.frame-rates-fps", {"fps": "60"})
+                    "name": "60 FPS"
                 },
                 {
                     "key": "100",
-                    "name": I18n.tr("options.frame-rates-fps", {"fps": "100"})
+                    "name": "100 FPS"
                 },
                 {
                     "key": "120",
-                    "name": I18n.tr("options.frame-rates-fps", {"fps": "120"})
+                    "name": "120 FPS"
                 },
                 {
                     "key": "144",
-                    "name": I18n.tr("options.frame-rates-fps", {"fps": "144"})
+                    "name": "144 FPS"
                 },
                 {
                     "key": "165",
-                    "name": I18n.tr("options.frame-rates-fps", {"fps": "165"})
+                    "name": "165 FPS"
                 },
                 {
                     "key": "240",
-                    "name": I18n.tr("options.frame-rates-fps", {"fps": "240"})
+                    "name": "240 FPS"
                 }
             ]
             currentKey: root.editFrameRate
@@ -200,24 +200,24 @@ ColumnLayout {
 
         // Video Quality
         NComboBox {
-            label: I18n.tr("panels.screen-recorder.video-video-quality-label")
-            description: I18n.tr("panels.screen-recorder.video-video-quality-description")
+            label: pluginApi.tr("settings.video.quality")
+            description: pluginApi.tr("settings.video.quality-desc")
             model: [
                 {
                     "key": "medium",
-                    "name": I18n.tr("options.screen-recording.quality-medium")
+                    "name": pluginApi.tr("settings.video.quality-medium")
                 },
                 {
                     "key": "high",
-                    "name": I18n.tr("options.screen-recording.quality-high")
+                    "name": pluginApi.tr("settings.video.quality-high")
                 },
                 {
                     "key": "very_high",
-                    "name": I18n.tr("options.screen-recording.quality-very-high")
+                    "name": pluginApi.tr("settings.video.quality-very-high")
                 },
                 {
                     "key": "ultra",
-                    "name": I18n.tr("options.screen-recording.quality-ultra")
+                    "name": pluginApi.tr("settings.video.quality-ultra")
                 }
             ]
             currentKey: root.editQuality
@@ -227,8 +227,8 @@ ColumnLayout {
 
         // Video Codec
         NComboBox {
-            label: I18n.tr("panels.screen-recorder.video-video-codec-label")
-            description: I18n.tr("panels.screen-recorder.video-video-codec-description")
+            label: pluginApi.tr("settings.video.codec")
+            description: pluginApi.tr("settings.video.codec-desc")
             model: {
                 let options = [
                     {"key": "h264", "name": "H264"},
@@ -266,16 +266,16 @@ ColumnLayout {
 
         // Color Range
         NComboBox {
-            label: I18n.tr("panels.screen-recorder.video-color-range-label")
-            description: I18n.tr("panels.screen-recorder.video-color-range-description")
+            label: pluginApi.tr("settings.video.color-range")
+            description: pluginApi.tr("settings.video.color-range-desc")
             model: [
                 {
                     "key": "limited",
-                    "name": I18n.tr("options.screen-recording.color-range-limited")
+                    "name": pluginApi.tr("settings.video.color-range-limited")
                 },
                 {
                     "key": "full",
-                    "name": I18n.tr("options.screen-recording.color-range-full")
+                    "name": pluginApi.tr("settings.video.color-range-full")
                 }
             ]
             currentKey: root.editColorRange
@@ -295,24 +295,24 @@ ColumnLayout {
 
         // Audio Source
         NComboBox {
-            label: I18n.tr("panels.screen-recorder.audio-audio-source-label")
-            description: I18n.tr("panels.screen-recorder.audio-audio-source-description")
+            label: pluginApi.tr("settings.audio.source")
+            description: pluginApi.tr("settings.audio.source-desc")
             model: [
                 {
                     "key": "none",
-                    "name": I18n.tr("options.screen-recording.audio-sources-none")
+                    "name": pluginApi.tr("settings.audio.audio-sources-none")
                 },
                 {
                     "key": "default_output",
-                    "name": I18n.tr("options.screen-recording.audio-sources-system-output")
+                    "name": pluginApi.tr("settings.audio.audio-sources-system-output")
                 },
                 {
                     "key": "default_input",
-                    "name": I18n.tr("options.screen-recording.audio-sources-microphone-input")
+                    "name": pluginApi.tr("settings.audio.audio-sources-microphone-input")
                 },
                 {
                     "key": "both",
-                    "name": I18n.tr("options.screen-recording.audio-sources-both")
+                    "name": pluginApi.tr("settings.audio.audio-sources-both")
                 }
             ]
             currentKey: root.editAudioSource
@@ -322,8 +322,8 @@ ColumnLayout {
 
         // Audio Codec
         NComboBox {
-            label: I18n.tr("panels.screen-recorder.audio-audio-codec-label")
-            description: I18n.tr("panels.screen-recorder.audio-audio-codec-description")
+            label: pluginApi.tr("settings.audio.codec")
+            description: pluginApi.tr("settings.audio.codec-desc")
             model: [
                 {
                     "key": "opus",
@@ -347,7 +347,7 @@ ColumnLayout {
     NFilePicker {
         id: folderPicker
         selectionMode: "folders"
-        title: I18n.tr("panels.screen-recorder.general-select-output-folder")
+        title: pluginApi.tr("settings.general.output-folder")
         initialPath: root.editDirectory || Quickshell.env("HOME") + "/Videos"
         onAccepted: paths => {
             if (paths.length > 0) {

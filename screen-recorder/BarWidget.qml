@@ -18,7 +18,7 @@ NIconButton {
 
     enabled: mainInstance?.isAvailable ?? false
     icon: "camera-video"
-    tooltipText: buildTooltip()
+    tooltipText: mainInstance?.buildTooltip()
     tooltipDirection: BarService.getTooltipDirection()
     baseSize: Style.capsuleHeight
     applyUiScale: false
@@ -32,7 +32,7 @@ NIconButton {
 
     onClicked: {
         if (!enabled) {
-            ToastService.showError(I18n.tr("toast.recording.not-installed"), I18n.tr("toast.recording.not-installed-desc"))
+            ToastService.showError(pluginApi.tr("messages.not-installed"), pluginApi.tr("messages.not-installed-desc"))
             return
         }
 
@@ -56,21 +56,6 @@ NIconButton {
         }
     }
 
-    function buildTooltip() {
-        if (!enabled) {
-            return I18n.tr("tooltips.screen-recorder-not-installed")
-        }
-
-        if (mainInstance?.isPending) {
-            return I18n.tr("panels.screen-recorder.title") + "\n" + I18n.tr("toast.recording.started")
-        }
-
-        if (mainInstance?.isRecording) {
-            return I18n.tr("tooltips.click-to-stop-recording")
-        }
-
-        return I18n.tr("tooltips.click-to-start-recording")
-    }
 
     NPopupContextMenu {
         id: contextMenu
