@@ -258,11 +258,6 @@ Item {
                 function startEdit() {
                   editing = true;
                   originalText = modelData.text;
-                  Qt.callLater(function() {
-                    if (todoTextEdit) {
-                      todoTextEdit.forceActiveFocus();
-                    }
-                  });
                 }
 
                 function saveEdit() {
@@ -286,6 +281,24 @@ Item {
 
                 function cancelEdit() {
                   editing = false;
+                }
+
+                // Watch for editing property changes to handle focus
+                onEditingChanged: {
+                    if (editing) {
+                        // Use a timer to delay the focus operation
+                        var timer = Qt.createQmlObject("
+                            import QtQuick 2.0;
+                            Timer {
+                                interval: 50;
+                                running: true;
+                                onTriggered: {
+                                    if (todoTextEdit && todoTextEdit.input) {
+                                        todoTextEdit.input.forceActiveFocus();
+                                    }
+                                }
+                            }", delegateItem);
+                    }
                 }
 
                 // Position binding for non-dragging state
@@ -531,27 +544,81 @@ Item {
                         anchors.rightMargin: Style.marginS
                       }
 
-                      // Edit text field
-                      NTextInput {
-                        id: todoTextEdit
+                      // Edit text field - Using TextField directly to have more control
+                      Item {
+                        id: todoTextEditContainer
                         visible: delegateItem.editing
-                        text: modelData.text
                         anchors.fill: parent
                         anchors.leftMargin: Style.marginS
-                        anchors.rightMargin: (Style.baseWidgetSize * 0.6 + Style.marginS) * 2 + Style.marginS  // Make room for two buttons and spacing
+                        anchors.rightMargin: Style.baseWidgetSize * 0.8 + Style.marginL
                         height: parent.height * 0.8
                         anchors.verticalCenter: parent.verticalCenter
 
-                        Keys.onReturnPressed: {
-                          delegateItem.saveEdit();
+                        TextField {
+                          id: todoTextEdit
+                          anchors.fill: parent
+                          anchors.rightMargin: Style.baseWidgetSize * 0.8
+                          text: modelData.text
+
+                          verticalAlignment: TextInput.AlignVCenter
+
+                          echoMode: TextInput.Normal
+                          color: Color.mOnSurface
+                          placeholderTextColor: Qt.alpha(Color.mOnSurfaceVariant, 0.6)
+
+                          selectByMouse: true
+
+                          topPadding: 0
+                          bottomPadding: 0
+                          leftPadding: Style.marginS
+                          rightPadding: Style.baseWidgetSize * 0.6
+
+                          font.family: Settings.data.ui.fontDefault
+                          font.pointSize: Style.fontSizeS * Style.uiScaleRatio
+                          font.weight: Style.fontWeightRegular
+
+                          // Remove the frame/background to eliminate border
+                          background: null
+
+                          Keys.onReturnPressed: {
+                            delegateItem.saveEdit();
+                          }
+
+                          Keys.onEscapePressed: {
+                            delegateItem.cancelEdit();
+                          }
+
+                          // Set focus when visible
+                          onVisibleChanged: {
+                            if (visible) {
+                              Qt.callLater(function() {
+                                todoTextEdit.forceActiveFocus();
+                              });
+                            }
+                          }
                         }
 
-                        Keys.onEscapePressed: {
-                          delegateItem.cancelEdit();
-                        }
+                        // Clear button
+                        NIconButton {
+                          icon: "restore"
+                          tooltipText: "Clear text"
 
-                        Component.onCompleted: {
-                          if (visible) forceActiveFocus();
+                          anchors.right: parent.right
+                          anchors.verticalCenter: parent.verticalCenter
+                          anchors.rightMargin: Style.marginM
+
+                          scale: 0.7  // Reduce the button size with scaling
+                          colorBg: "transparent"
+                          colorBgHover: "transparent"
+                          colorFg: Color.mOnSurface
+                          colorFgHover: Color.mError
+
+                          visible: todoTextEdit.text.length > 0
+
+                          onClicked: {
+                            todoTextEdit.clear();
+                            todoTextEdit.forceActiveFocus();
+                          }
                         }
                       }
                     }
