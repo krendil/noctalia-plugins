@@ -32,7 +32,8 @@ Rectangle {
   readonly property real rate: main ? main.getRate(fromCurrency, toCurrency) : 0
 
   // Bar orientation
-  readonly property bool isVertical: Settings.data.bar.position === "left" || Settings.data.bar.position === "right"
+  readonly property string barPosition: Settings.data.bar.position || "top"
+  readonly property bool isVertical: barPosition === "left" || barPosition === "right"
 
   // Sizing
   implicitWidth: isVertical ? Style.capsuleHeight : contentWidth
@@ -100,8 +101,7 @@ Rectangle {
 
     NIcon {
       icon: "currency-dollar"
-      color: Color.mPrimary
-      pointSize: Style.toOdd(Style.capsuleHeight * 0.5)
+      applyUiScale: false
       Layout.alignment: Qt.AlignVCenter
       visible: !loading
     }
@@ -111,6 +111,7 @@ Rectangle {
       text: displayText
       color: Color.mOnSurface
       pointSize: Style.barFontSize
+      font.weight: Font.Medium
       applyUiScale: false
       Layout.alignment: Qt.AlignVCenter
       visible: displayMode !== "icon"
@@ -120,8 +121,7 @@ Rectangle {
   // Vertical layout - icon only option
   ColumnLayout {
     anchors.fill: parent
-    anchors.margins: Style.marginS
-    spacing: Style.marginXS
+    spacing: Style.marginS
     visible: isVertical
 
     // Loading spinner
@@ -141,8 +141,6 @@ Rectangle {
 
     NIcon {
       icon: "currency-dollar"
-      color: Color.mPrimary
-      pointSize: Style.toOdd(Style.capsuleHeight * 0.45)
       Layout.alignment: Qt.AlignHCenter
       visible: !loading
     }
