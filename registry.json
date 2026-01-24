@@ -316,7 +316,7 @@
     {
       "id": "screen-recorder",
       "name": "Screen Recorder",
-      "version": "1.0.8",
+      "version": "1.1.0",
       "author": "Noctalia Team",
       "description": "Hardware-accelerated screen recording using gpu-screen-recorder with customizable video and audio settings",
       "repository": "https://github.com/noctalia-dev/noctalia-plugins",
@@ -326,7 +326,7 @@
         "Bar",
         "Utility"
       ],
-      "lastUpdated": "2026-01-21T11:34:47+11:00"
+      "lastUpdated": "2026-01-24T15:33:52+01:00"
     },
     {
       "id": "screenshot",
