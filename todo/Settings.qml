@@ -14,9 +14,9 @@ ColumnLayout {
 
   // Priority color properties
   property bool valueUseCustomColors: pluginApi?.pluginSettings?.useCustomColors !== undefined ? pluginApi.pluginSettings.useCustomColors : false
-  property color valueHighPriorityColor: (pluginApi?.pluginSettings?.priorityColors?.high) || (pluginApi?.manifest?.metadata?.defaultSettings?.priorityColors?.high) || Color.mError
-  property color valueMediumPriorityColor: (pluginApi?.pluginSettings?.priorityColors?.medium) || (pluginApi?.manifest?.metadata?.defaultSettings?.priorityColors?.medium) || Color.mPrimary
-  property color valueLowPriorityColor: (pluginApi?.pluginSettings?.priorityColors?.low) || (pluginApi?.manifest?.metadata?.defaultSettings?.priorityColors?.low) || Color.mOnSurfaceVariant
+  property color valueHighPriorityColor: (pluginApi?.pluginSettings?.priorityColors?.high) || (pluginApi?.manifest?.metadata?.defaultSettings?.priorityColors?.high) || Color.mError.toString()
+  property color valueMediumPriorityColor: (pluginApi?.pluginSettings?.priorityColors?.medium) || (pluginApi?.manifest?.metadata?.defaultSettings?.priorityColors?.medium) || Color.mPrimary.toString()
+  property color valueLowPriorityColor: (pluginApi?.pluginSettings?.priorityColors?.low) || (pluginApi?.manifest?.metadata?.defaultSettings?.priorityColors?.low) || Color.mOnSurfaceVariant.toString()
 
 
   spacing: Style.marginL
@@ -512,15 +512,15 @@ ColumnLayout {
       if (!pluginApi.pluginSettings.priorityColors) {
         pluginApi.pluginSettings.priorityColors = {};
       }
-      pluginApi.pluginSettings.priorityColors.high = root.valueHighPriorityColor;
-      pluginApi.pluginSettings.priorityColors.medium = root.valueMediumPriorityColor;
-      pluginApi.pluginSettings.priorityColors.low = root.valueLowPriorityColor;
+      pluginApi.pluginSettings.priorityColors.high = root.valueHighPriorityColor.toString();
+      pluginApi.pluginSettings.priorityColors.medium = root.valueMediumPriorityColor.toString();
+      pluginApi.pluginSettings.priorityColors.low = root.valueLowPriorityColor.toString();
     } else {
       // If custom colors are disabled, reset to defaults
       pluginApi.pluginSettings.priorityColors = {
-        "high": Color.mError,
-        "medium": Color.mPrimary,
-        "low": Color.mOnSurfaceVariant
+        "high": Color.mError.toString(),
+        "medium": Color.mPrimary.toString(),
+        "low": Color.mOnSurfaceVariant.toString()
       };
     }
 
