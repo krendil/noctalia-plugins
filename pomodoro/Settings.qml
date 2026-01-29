@@ -16,6 +16,11 @@ ColumnLayout {
   property bool editAutoStartWork: false
   property bool editCompactMode: false
 
+  property int editBarFontSize: 12
+  
+  // --- : Sound Property ---
+  property bool editPlaySound: true
+
   spacing: Style.marginM
 
   onPluginApiChanged: {
@@ -43,14 +48,23 @@ ColumnLayout {
     root.editAutoStartWork = settings?.autoStartWork ?? defaults?.autoStartWork ?? false
     root.editCompactMode = settings?.compactMode ?? defaults?.compactMode ?? false
 
+    // Load font size
+    root.editBarFontSize = settings?.barFontSize ?? defaults?.barFontSize ?? 12
+    
+    // --- : Load Sound Setting ---
+    root.editPlaySound = settings?.playSound ?? defaults?.playSound ?? true
+
     autoStartBreaksToggle.checked = root.editAutoStartBreaks
     autoStartWorkToggle.checked = root.editAutoStartWork
     compactModeToggle.checked = root.editCompactMode
+    playSoundToggle.checked = root.editPlaySound
 
     Logger.i("Pomodoro", "Settings loaded: workDuration=" + root.editWorkDuration + 
              ", autoStartBreaks=" + root.editAutoStartBreaks +
              ", autoStartWork=" + root.editAutoStartWork +
-             ", compactMode=" + root.editCompactMode)
+             ", compactMode=" + root.editCompactMode +
+             ", playSound=" + root.editPlaySound +
+             ", barFontSize=" + root.editBarFontSize)
   }
 
   ColumnLayout {
@@ -129,6 +143,26 @@ ColumnLayout {
     }
   }
 
+  // ---  SETTING: Font Size ---
+  ColumnLayout {
+    Layout.fillWidth: true
+    spacing: Style.marginS
+
+    NLabel {
+      label: "Widget Font Size"
+      description: "Text size for the panel bar widget"
+    }
+
+    NSpinBox {
+      id: fontSizeSpinBox
+      from: 8
+      to: 32
+      stepSize: 1
+      value: root.editBarFontSize
+      onValueChanged: if (value !== root.editBarFontSize) root.editBarFontSize = value
+    }
+  }
+
   NDivider {
     Layout.fillWidth: true
     Layout.topMargin: Style.marginM
@@ -201,6 +235,29 @@ ColumnLayout {
     }
   }
 
+  // --- : Play Sound Toggle ---
+  Item {
+    Layout.fillWidth: true
+    Layout.preferredHeight: playSoundToggle.implicitHeight
+
+    NToggle {
+      id: playSoundToggle
+      anchors.fill: parent
+      label: "Play Alarm Sound"
+      description: "Play a sound when the timer finishes"
+      checked: root.editPlaySound
+    }
+
+    MouseArea {
+      anchors.fill: parent
+      cursorShape: Qt.PointingHandCursor
+      onClicked: {
+        root.editPlaySound = !root.editPlaySound
+        playSoundToggle.checked = root.editPlaySound
+      }
+    }
+  }
+
   function saveSettings() {
     if (!pluginApi) {
       Logger.e("Pomodoro", "Cannot save settings: pluginApi is null")
@@ -215,6 +272,12 @@ ColumnLayout {
     pluginApi.pluginSettings.autoStartWork = root.editAutoStartWork
     pluginApi.pluginSettings.compactMode = root.editCompactMode
 
+    // Save font size
+    pluginApi.pluginSettings.barFontSize = root.editBarFontSize
+    
+    // --- : Save Sound Setting ---
+    pluginApi.pluginSettings.playSound = root.editPlaySound
+
     pluginApi.saveSettings()
 
     if (pluginApi.mainInstance) {
@@ -227,6 +290,8 @@ ColumnLayout {
              ", sessions=" + root.editSessionsBeforeLongBreak +
              ", autoStartBreaks=" + root.editAutoStartBreaks +
              ", autoStartWork=" + root.editAutoStartWork +
-             ", compactMode=" + root.editCompactMode)
+             ", compactMode=" + root.editCompactMode +
+             ", barFontSize=" + root.editBarFontSize +
+             ", playSound=" + root.editPlaySound)
   }
 }
