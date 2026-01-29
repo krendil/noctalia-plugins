@@ -7,172 +7,15 @@ import qs.Widgets
 
 DraggableDesktopWidget {
   id: root
+  showBackground: (pluginApi && pluginApi.pluginSettings ? (pluginApi.pluginSettings.showBackground !== undefined ? pluginApi.pluginSettings.showBackground : pluginApi?.manifest?.metadata?.defaultSettings?.showBackground) : pluginApi?.manifest?.metadata?.defaultSettings?.showBackground)
 
   property var pluginApi: null
-
-  // Internal utility functions
-  function updateTodoProperties(todoId, updates) {
-    if (!pluginApi) return false;
-
-    var todos = pluginApi.pluginSettings.todos || [];
-    for (var i = 0; i < todos.length; i++) {
-      if (todos[i].id === todoId) {
-        // Preserve all existing properties, only update specified fields
-        todos[i] = {
-          id: todos[i].id,
-          text: updates.text !== undefined ? updates.text : todos[i].text,
-          completed: updates.completed !== undefined ? updates.completed : todos[i].completed,
-          createdAt: todos[i].createdAt,
-          pageId: todos[i].pageId || 0,
-          priority: updates.priority !== undefined ? updates.priority : (todos[i].priority || "medium")
-        };
-        return true;
-      }
-    }
-    return false;
-  }
-
-  function calculateCompletedCount() {
-    if (!pluginApi) return 0;
-
-    var todos = pluginApi.pluginSettings.todos || [];
-    var completedCount = 0;
-    for (var j = 0; j < todos.length; j++) {
-      if (todos[j].completed) {
-        completedCount++;
-      }
-    }
-    return completedCount;
-  }
   property bool expanded: pluginApi?.pluginSettings?.isExpanded !== undefined ? pluginApi.pluginSettings.isExpanded : (pluginApi?.manifest?.metadata?.defaultSettings?.isExpanded || false)
   property bool showCompleted: pluginApi?.pluginSettings?.showCompleted !== undefined ? pluginApi.pluginSettings.showCompleted : pluginApi?.manifest?.metadata?.defaultSettings?.showCompleted
   property ListModel filteredTodosModel: ListModel {}
-
-  function moveTodoToCorrectPosition(todoId) {
-    if (!pluginApi) return;
-
-    var todos = pluginApi.pluginSettings.todos || [];
-    var currentPageId = pluginApi?.pluginSettings?.current_page_id || 0;
-    var todoIndex = -1;
-
-    for (var i = 0; i < todos.length; i++) {
-      if (todos[i].id === todoId) {
-        todoIndex = i;
-        break;
-      }
-    }
-
-    if (todoIndex !== -1) {
-      var movedTodo = todos[todoIndex];
-
-      todos.splice(todoIndex, 1);
-
-      // Only reorder within the same page
-      if (movedTodo.pageId === currentPageId) {
-        if (movedTodo.completed) {
-          // Place completed items at the end of the page
-          var insertIndex = todos.length;
-          for (var j = todos.length - 1; j >= 0; j--) {
-            if (todos[j].pageId === currentPageId && todos[j].completed) {
-              insertIndex = j + 1;
-              break;
-            }
-          }
-          todos.splice(insertIndex, 0, movedTodo);
-        } else {
-          // Place uncompleted items at the beginning of the page
-          var insertIndex = 0;
-          for (; insertIndex < todos.length; insertIndex++) {
-            if (todos[insertIndex].pageId === currentPageId) {
-              if (todos[insertIndex].completed) {
-                break;
-              }
-            }
-          }
-          todos.splice(insertIndex, 0, movedTodo);
-        }
-      } else {
-        // If the todo is not on the current page, just add it back to its original position
-        todos.splice(todoIndex, 0, movedTodo);
-      }
-
-      pluginApi.pluginSettings.todos = todos;
-      pluginApi.saveSettings();
-    }
-  }
-
-  // Helper function to get priority color
-  function getPriorityColor(priority) {
-    // Ensure priority is a valid string
-    if (!priority || typeof priority !== 'string') {
-      priority = "medium";
-    }
-
-    // Validate priority value
-    var validPriorities = ["high", "medium", "low"];
-    if (validPriorities.indexOf(priority) === -1) {
-      priority = "medium"; // Default to medium if invalid
-    }
-
-    // Simplified implementation using helper functions
-    if (!pluginApi) {
-      return getDefaultColor(priority);
-    }
-
-    var useCustomColors = pluginApi?.pluginSettings?.useCustomColors;
-    if (!useCustomColors) {
-      return getThemeColor(priority);
-    }
-
-    return getCustomColor(priority);
-  }
-
-  // Helper function to get default color when pluginApi is not available
-  function getDefaultColor(priority) {
-    if (priority === "high") {
-      return Color.mError;
-    } else if (priority === "low") {
-      return Color.mOnSurfaceVariant;
-    } else {
-      return Color.mPrimary;
-    }
-  }
-
-  // Helper function to get theme color when custom colors are disabled
-  function getThemeColor(priority) {
-    if (priority === "high") {
-      return Color.mError;
-    } else if (priority === "low") {
-      return Color.mOnSurfaceVariant;
-    } else {
-      return Color.mPrimary;
-    }
-  }
-
-  // Helper function to get custom color when custom colors are enabled
-  function getCustomColor(priority) {
-    var priorityColors = pluginApi?.pluginSettings?.priorityColors || {
-      "high": Color.mError,
-      "medium": Color.mPrimary,
-      "low": Color.mOnSurfaceVariant
-    };
-
-    if (priority === "high") {
-      return priorityColors.high || Color.mError;
-    } else if (priority === "low") {
-      return priorityColors.low || Color.mOnSurfaceVariant;
-    } else {
-      return priorityColors.medium || Color.mPrimary;
-    }
-  }
-
-
-  showBackground: (pluginApi && pluginApi.pluginSettings ? (pluginApi.pluginSettings.showBackground !== undefined ? pluginApi.pluginSettings.showBackground : pluginApi?.manifest?.metadata?.defaultSettings?.showBackground) : pluginApi?.manifest?.metadata?.defaultSettings?.showBackground)
-
   readonly property color todoBg: showBackground ? Qt.rgba(0, 0, 0, 0.2) : "transparent"
   readonly property color itemBg: showBackground ? Color.mSurface : "transparent"
   readonly property color completedItemBg: showBackground ? Color.mSurfaceVariant : "transparent"
-
   // Scaled dimensions
   readonly property int scaledMarginM: Math.round(Style.marginM * widgetScale)
   readonly property int scaledMarginS: Math.round(Style.marginS * widgetScale)
@@ -194,46 +37,9 @@ DraggableDesktopWidget {
     var tabBarHeight = scaledBaseWidgetSize * 0.8;
     var todosCount = root.filteredTodosModel.count;
     var contentHeight = (todosCount === 0) ? scaledBaseWidgetSize : (scaledBaseWidgetSize * todosCount + scaledMarginS * (todosCount - 1));
-
     var totalHeight = contentHeight + headerHeight + tabBarHeight + scaledMarginS + scaledMarginM * 4;
+
     return Math.min(totalHeight, headerHeight + tabBarHeight + Math.round(400 * widgetScale));
-  }
-
-  function getCurrentTodos() {
-    return pluginApi?.pluginSettings?.todos || [];
-  }
-
-  function getCurrentShowCompleted() {
-    return pluginApi?.pluginSettings?.showCompleted !== undefined ? pluginApi.pluginSettings.showCompleted : pluginApi?.manifest?.metadata?.defaultSettings?.showCompleted || false;
-  }
-
-  function updateFilteredTodos() {
-    if (!pluginApi) return;
-
-    filteredTodosModel.clear();
-
-    var pluginTodos = getCurrentTodos();
-    var currentShowCompleted = getCurrentShowCompleted();
-    var currentPageId = pluginApi?.pluginSettings?.current_page_id || 0;
-
-    // Process todos in a single pass
-    for (var i = 0; i < pluginTodos.length; i++) {
-      var todo = pluginTodos[i];
-
-      // Check if todo belongs to current page
-      if (todo.pageId === currentPageId) {
-        // Check if completed items should be shown
-        if (currentShowCompleted || !todo.completed) {
-          filteredTodosModel.append({
-            id: todo.id,
-            text: todo.text,
-            completed: todo.completed,
-            pageId: todo.pageId || 0,
-            priority: todo.priority || "medium"
-          });
-        }
-      }
-    }
   }
 
   Timer {
@@ -472,33 +278,7 @@ DraggableDesktopWidget {
                           hoverEnabled: false
 
                           onClicked: {
-                            if (pluginApi) {
-                              // Get the current todo to determine the new completed state
-                              var todos = pluginApi.pluginSettings.todos || [];
-                              var currentTodo = null;
-
-                              for (var i = 0; i < todos.length; i++) {
-                                if (todos[i].id === model.id) {
-                                  currentTodo = todos[i];
-                                  break;
-                                }
-                              }
-
-                              if (currentTodo) {
-                                // Use the internal utility function to update the todo
-                                updateTodoProperties(model.id, {
-                                  completed: !currentTodo.completed
-                                });
-
-                                // Update completed count using utility function
-                                pluginApi.pluginSettings.completedCount = calculateCompletedCount();
-
-                                moveTodoToCorrectPosition(model.id);
-
-                                pluginApi.saveSettings();
-                                updateFilteredTodos();
-                              }
-                            }
+                            toggleTodo(model.id, model.completed);
                           }
                         }
                       }
@@ -565,6 +345,226 @@ DraggableDesktopWidget {
             font.pointSize: scaledFontSizeM
             font.weight: Font.Normal
           }
+        }
+      }
+    }
+  }
+
+  // Internal utility functions
+  function updateTodo(todoId, updates) {
+    if (!pluginApi) return false;
+
+    var todos = pluginApi.pluginSettings.todos || [];
+    for (var i = 0; i < todos.length; i++) {
+      if (todos[i].id === todoId) {
+        // Preserve all existing properties, only update specified fields
+        todos[i] = {
+          id: todos[i].id,
+          text: updates.text !== undefined ? updates.text : todos[i].text,
+          completed: updates.completed !== undefined ? updates.completed : todos[i].completed,
+          createdAt: todos[i].createdAt,
+          pageId: todos[i].pageId || 0,
+          priority: updates.priority !== undefined ? updates.priority : (todos[i].priority || "medium")
+        };
+        return true;
+      }
+    }
+    return false;
+  }
+
+  // Helper function to toggle todo completion status
+  function toggleTodo(todoId, currentCompletedStatus) {
+    if (!pluginApi) {
+      Logger.e("Todo", "pluginApi is null, cannot toggle todo");
+      return false;
+    }
+
+    // Use the existing updateTodo function to update only the completion status
+    var success = updateTodo(todoId, {
+      completed: !currentCompletedStatus
+    });
+
+    if (success) {
+      pluginApi.pluginSettings.todos = pluginApi.pluginSettings.todos;
+
+      var completedCount = calculateCompletedCount();
+      pluginApi.pluginSettings.completedCount = completedCount;
+
+      moveTodoToCorrectPosition(todoId);
+
+      pluginApi.saveSettings();
+      updateFilteredTodos(); // Reload the UI
+      return true;
+    } else {
+      Logger.e("Todo", "Failed to toggle todo with ID " + todoId);
+      return false;
+    }
+  }
+
+  function calculateCompletedCount() {
+    if (!pluginApi) return 0;
+
+    var todos = pluginApi.pluginSettings.todos || [];
+    var completedCount = 0;
+    for (var j = 0; j < todos.length; j++) {
+      if (todos[j].completed) {
+        completedCount++;
+      }
+    }
+    return completedCount;
+  }
+
+
+  function moveTodoToCorrectPosition(todoId) {
+    if (!pluginApi) return;
+
+    var todos = pluginApi.pluginSettings.todos || [];
+    var currentPageId = pluginApi?.pluginSettings?.current_page_id || 0;
+    var todoIndex = -1;
+
+    for (var i = 0; i < todos.length; i++) {
+      if (todos[i].id === todoId) {
+        todoIndex = i;
+        break;
+      }
+    }
+
+    if (todoIndex !== -1) {
+      var movedTodo = todos[todoIndex];
+
+      todos.splice(todoIndex, 1);
+
+      // Only reorder within the same page
+      if (movedTodo.pageId === currentPageId) {
+        if (movedTodo.completed) {
+          // Place completed items at the end of the page
+          var insertIndex = todos.length;
+          for (var j = todos.length - 1; j >= 0; j--) {
+            if (todos[j].pageId === currentPageId && todos[j].completed) {
+              insertIndex = j + 1;
+              break;
+            }
+          }
+          todos.splice(insertIndex, 0, movedTodo);
+        } else {
+          // Place uncompleted items at the beginning of the page
+          var insertIndex = 0;
+          for (; insertIndex < todos.length; insertIndex++) {
+            if (todos[insertIndex].pageId === currentPageId) {
+              if (todos[insertIndex].completed) {
+                break;
+              }
+            }
+          }
+          todos.splice(insertIndex, 0, movedTodo);
+        }
+      } else {
+        // If the todo is not on the current page, just add it back to its original position
+        todos.splice(todoIndex, 0, movedTodo);
+      }
+
+      pluginApi.pluginSettings.todos = todos;
+      pluginApi.saveSettings();
+    }
+  }
+
+  // Helper function to get priority color
+  function getPriorityColor(priority) {
+    // Ensure priority is a valid string
+    if (!priority || typeof priority !== 'string') {
+      priority = "medium";
+    }
+
+    // Validate priority value
+    var validPriorities = ["high", "medium", "low"];
+    if (validPriorities.indexOf(priority) === -1) {
+      priority = "medium"; // Default to medium if invalid
+    }
+
+    // Simplified implementation using helper functions
+    if (!pluginApi) {
+      return getDefaultColor(priority);
+    }
+
+    var useCustomColors = pluginApi?.pluginSettings?.useCustomColors;
+    if (!useCustomColors) {
+      return getThemeColor(priority);
+    }
+
+    return getCustomColor(priority);
+  }
+
+  // Helper function to get default color when pluginApi is not available
+  function getDefaultColor(priority) {
+    if (priority === "high") {
+      return Color.mError;
+    } else if (priority === "low") {
+      return Color.mOnSurfaceVariant;
+    } else {
+      return Color.mPrimary;
+    }
+  }
+
+  // Helper function to get theme color when custom colors are disabled
+  function getThemeColor(priority) {
+    if (priority === "high") {
+      return Color.mError;
+    } else if (priority === "low") {
+      return Color.mOnSurfaceVariant;
+    } else {
+      return Color.mPrimary;
+    }
+  }
+
+  // Helper function to get custom color when custom colors are enabled
+  function getCustomColor(priority) {
+    var priorityColors = pluginApi?.pluginSettings?.priorityColors || {
+      "high": Color.mError,
+      "medium": Color.mPrimary,
+      "low": Color.mOnSurfaceVariant
+    };
+
+    if (priority === "high") {
+      return priorityColors.high || Color.mError;
+    } else if (priority === "low") {
+      return priorityColors.low || Color.mOnSurfaceVariant;
+    } else {
+      return priorityColors.medium || Color.mPrimary;
+    }
+  }
+
+  function getCurrentTodos() {
+    return pluginApi?.pluginSettings?.todos || [];
+  }
+
+  function getCurrentShowCompleted() {
+    return pluginApi?.pluginSettings?.showCompleted !== undefined ? pluginApi.pluginSettings.showCompleted : pluginApi?.manifest?.metadata?.defaultSettings?.showCompleted || false;
+  }
+
+  function updateFilteredTodos() {
+    if (!pluginApi) return;
+
+    filteredTodosModel.clear();
+
+    var pluginTodos = getCurrentTodos();
+    var currentShowCompleted = getCurrentShowCompleted();
+    var currentPageId = pluginApi?.pluginSettings?.current_page_id || 0;
+
+    // Process todos in a single pass
+    for (var i = 0; i < pluginTodos.length; i++) {
+      var todo = pluginTodos[i];
+
+      // Check if todo belongs to current page
+      if (todo.pageId === currentPageId) {
+        // Check if completed items should be shown
+        if (currentShowCompleted || !todo.completed) {
+          filteredTodosModel.append({
+            id: todo.id,
+            text: todo.text,
+            completed: todo.completed,
+            pageId: todo.pageId || 0,
+            priority: todo.priority || "medium"
+          });
         }
       }
     }

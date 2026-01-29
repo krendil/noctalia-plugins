@@ -9,50 +9,6 @@ Item {
   id: root
 
   property var pluginApi: null
-
-  // Internal utility functions
-  function updateTodoProperties(todoId, updates) {
-    if (!pluginApi) return false;
-
-    var todos = pluginApi.pluginSettings.todos || [];
-    for (var i = 0; i < todos.length; i++) {
-      if (todos[i].id === todoId) {
-        // Preserve all existing properties, only update specified fields
-        todos[i] = {
-          id: todos[i].id,
-          text: updates.text !== undefined ? updates.text : todos[i].text,
-          completed: updates.completed !== undefined ? updates.completed : todos[i].completed,
-          createdAt: todos[i].createdAt,
-          pageId: todos[i].pageId || 0,
-          priority: updates.priority !== undefined ? updates.priority : (todos[i].priority || "medium")
-        };
-        return true;
-      }
-    }
-    return false;
-  }
-
-  function calculateCompletedCount() {
-    if (!pluginApi) return 0;
-
-    var todos = pluginApi.pluginSettings.todos || [];
-    var completedCount = 0;
-    for (var j = 0; j < todos.length; j++) {
-      if (todos[j].completed) {
-        completedCount++;
-      }
-    }
-    return completedCount;
-  }
-
-  function findPageIndexInTodos(pageTodos, targetItem) {
-    for (var i = 0; i < pageTodos.length; i++) {
-      if (pageTodos[i].id === targetItem.id) {
-        return i;
-      }
-    }
-    return -1;
-  }
   readonly property var geometryPlaceholder: panelContainer
   property real contentPreferredWidth: 700 * Style.uiScaleRatio
   property real contentPreferredHeight: 500 * Style.uiScaleRatio
@@ -79,129 +35,6 @@ Item {
     value: pluginApi?.pluginSettings?.todos || []
   }
 
-  function moveTodoToCorrectPosition(todoId) {
-    if (!pluginApi) return;
-
-    var todos = pluginApi.pluginSettings.todos || [];
-    var currentPageId = pluginApi?.pluginSettings?.current_page_id || 0;
-
-    // Find the todo to move
-    var todoToMove = null;
-    var todoGlobalIndex = -1;
-
-    for (var i = 0; i < todos.length; i++) {
-      if (todos[i].id === todoId) {
-        todoToMove = todos[i];
-        todoGlobalIndex = i;
-        break;
-      }
-    }
-
-    if (todoToMove && todoGlobalIndex !== -1) {
-      // Remove the todo from its current position
-      todos.splice(todoGlobalIndex, 1);
-
-      // Only reorder within the same page
-      if (todoToMove.pageId === currentPageId) {
-        // Find the correct position within the same page
-        if (todoToMove.completed) {
-          // Place completed items at the end of the page
-          var insertIndex = todos.length;
-          for (var j = todos.length - 1; j >= 0; j--) {
-            if (todos[j].pageId === currentPageId && todos[j].completed) {
-              insertIndex = j + 1;
-              break;
-            }
-          }
-          todos.splice(insertIndex, 0, todoToMove);
-        } else {
-          // Place uncompleted items at the beginning of the page
-          var insertIndex = 0;
-          for (; insertIndex < todos.length; insertIndex++) {
-            if (todos[insertIndex].pageId === currentPageId) {
-              if (todos[insertIndex].completed) {
-                break;
-              }
-            }
-          }
-          todos.splice(insertIndex, 0, todoToMove);
-        }
-      } else {
-        // If the todo is not on the current page, just add it back to its original position
-        todos.splice(todoGlobalIndex, 0, todoToMove);
-      }
-
-      pluginApi.pluginSettings.todos = todos;
-      pluginApi.saveSettings();
-    }
-  }
-
-  // Helper function to get priority color
-  function getPriorityColor(priority) {
-    // Ensure priority is a valid string
-    if (!priority || typeof priority !== 'string') {
-      priority = "medium";
-    }
-
-    // Validate priority value
-    var validPriorities = ["high", "medium", "low"];
-    if (validPriorities.indexOf(priority) === -1) {
-      priority = "medium"; // Default to medium if invalid
-    }
-
-    // Simplified implementation using helper functions
-    if (!pluginApi) {
-      return getDefaultColor(priority);
-    }
-
-    var useCustomColors = pluginApi?.pluginSettings?.useCustomColors;
-    if (!useCustomColors) {
-      return getThemeColor(priority);
-    }
-
-    return getCustomColor(priority);
-  }
-
-  // Helper function to get default color when pluginApi is not available
-  function getDefaultColor(priority) {
-    if (priority === "high") {
-      return Color.mError;
-    } else if (priority === "low") {
-      return Color.mOnSurfaceVariant;
-    } else {
-      return Color.mPrimary;
-    }
-  }
-
-  // Helper function to get theme color when custom colors are disabled
-  function getThemeColor(priority) {
-    if (priority === "high") {
-      return Color.mError;
-    } else if (priority === "low") {
-      return Color.mOnSurfaceVariant;
-    } else {
-      return Color.mPrimary;
-    }
-  }
-
-  // Helper function to get custom color when custom colors are enabled
-  function getCustomColor(priority) {
-    var priorityColors = pluginApi?.pluginSettings?.priorityColors || {
-      "high": Color.mError,
-      "medium": Color.mPrimary,
-      "low": Color.mOnSurfaceVariant
-    };
-
-    if (priority === "high") {
-      return priorityColors.high || Color.mError;
-    } else if (priority === "low") {
-      return priorityColors.low || Color.mOnSurfaceVariant;
-    } else {
-      return priorityColors.medium || Color.mPrimary;
-    }
-  }
-
-
   Component.onCompleted: {
     if (pluginApi) {
       Logger.i("Todo", "Panel initialized");
@@ -212,60 +45,6 @@ Item {
       root.showEmptyState = false;
       loadTodos();
     }
-  }
-
-  function loadTodos() {
-    // Store the current scroll position
-    var currentScrollPos = todoListView ? todoListView.contentY : 0;
-
-    todosModel.clear();
-    filteredTodosModel.clear();
-
-    var pluginTodos = root.rawTodos;
-    var currentPageId = pluginApi?.pluginSettings?.current_page_id || 0;
-
-    // Process todos in a single pass
-    var pageTodos = [];
-    var filteredPageTodos = [];
-
-    for (var i = 0; i < pluginTodos.length; i++) {
-      var todo = pluginTodos[i];
-      if (todo.pageId === currentPageId) {
-        var todoItem = {
-          id: todo.id,
-          text: todo.text,
-          completed: todo.completed === true,
-          createdAt: todo.createdAt,
-          pageId: todo.pageId,
-          priority: todo.priority || "medium"
-        };
-
-        pageTodos.push(todoItem);
-
-        if (showCompleted || !todo.completed) {
-          filteredPageTodos.push(todoItem);
-        }
-      }
-    }
-
-    // Populate models
-    for (var j = 0; j < pageTodos.length; j++) {
-      todosModel.append(pageTodos[j]);
-    }
-
-    for (var k = 0; k < filteredPageTodos.length; k++) {
-      filteredTodosModel.append(filteredPageTodos[k]);
-    }
-
-    // Restore the scroll position
-    if (todoListView) {
-      Qt.callLater(function() {
-        todoListView.contentY = currentScrollPos;
-      });
-    }
-
-    // Start the timer to delay checking if the model is empty
-    emptyStateTimer.start();
   }
 
   onPluginApiChanged: {
@@ -347,30 +126,7 @@ Item {
               icon: "trash"
               fontSize: Style.fontSizeS
               onClicked: {
-                if (pluginApi) {
-                  var todos = pluginApi.pluginSettings.todos || [];
-                  var currentPageId = pluginApi.pluginSettings.current_page_id || 0;
-
-                  // Only clear completed todos for the current page
-                  var activeTodos = todos.filter(function(todo) {
-                    return !(todo.completed && todo.pageId === currentPageId);
-                  });
-
-                  pluginApi.pluginSettings.todos = activeTodos;
-
-                  // Update counts
-                  var newCompletedCount = 0;
-                  for (var j = 0; j < activeTodos.length; j++) {
-                    if (activeTodos[j].completed) {
-                      newCompletedCount++;
-                    }
-                  }
-                  pluginApi.pluginSettings.completedCount = newCompletedCount;
-                  pluginApi.pluginSettings.count = activeTodos.length;
-
-                  pluginApi.saveSettings();
-                  loadTodos();
-                }
+                clearCompletedTodos();
               }
             }
           }
@@ -570,7 +326,7 @@ Item {
                   if (pluginApi && todoTextEdit.text.trim() !== "") {
                     var todos = pluginApi.pluginSettings.todos || [];
 
-                    updateTodoProperties(modelData.id, {
+                    updateTodo(modelData.id, {
                       text: todoTextEdit.text.trim()
                     });
 
@@ -829,22 +585,7 @@ Item {
                           anchors.fill: parent
                           cursorShape: Qt.PointingHandCursor
                           onClicked: {
-                            if (pluginApi) {
-                              var todos = pluginApi.pluginSettings.todos || [];
-
-                              updateTodoProperties(modelData.id, {
-                                completed: !modelData.completed
-                              });
-
-                              pluginApi.pluginSettings.todos = pluginApi.pluginSettings.todos;
-
-                              var completedCount = calculateCompletedCount();
-                              pluginApi.pluginSettings.completedCount = completedCount;
-
-                              moveTodoToCorrectPosition(modelData.id);
-
-                              loadTodos();
-                            }
+                            toggleTodo(modelData.id, modelData.completed);
                           }
                         }
                       }
@@ -1080,41 +821,7 @@ Item {
                           hoverEnabled: true
                           cursorShape: Qt.PointingHandCursor
                           onClicked: {
-                            // Directly modify the todos list through pluginApi
-                            if (pluginApi) {
-                              var todos = pluginApi.pluginSettings.todos || [];
-                              var indexToRemove = -1;
-
-                              for (var i = 0; i < todos.length; i++) {
-                                if (todos[i].id === modelData.id) {
-                                  indexToRemove = i;
-                                  break;
-                                }
-                              }
-
-                              if (indexToRemove !== -1) {
-                                todos.splice(indexToRemove, 1);
-
-                                pluginApi.pluginSettings.todos = todos;
-                                pluginApi.pluginSettings.count = todos.length;
-
-                                // Recalculate completed count after removal
-                                var completedCount = 0;
-                                for (var j = 0; j < todos.length; j++) {
-                                  if (todos[j].completed) {
-                                    completedCount++;
-                                  }
-                                }
-                                pluginApi.pluginSettings.completedCount = completedCount;
-
-                                pluginApi.saveSettings();
-                                loadTodos();
-                              } else {
-                                Logger.e("Todo", "Todo with ID " + modelData.id + " not found for deletion");
-                              }
-                            } else {
-                              Logger.e("Todo", "pluginApi is null, cannot delete todo");
-                            }
+                            removeTodo(modelData.id);
                           }
                         }
 
@@ -1322,5 +1029,328 @@ Item {
       pluginApi.saveSettings();
       loadTodos();
     }
+  }
+
+  // Internal utility functions
+  function updateTodo(todoId, updates) {
+    if (!pluginApi) return false;
+
+    var todos = pluginApi.pluginSettings.todos || [];
+    for (var i = 0; i < todos.length; i++) {
+      if (todos[i].id === todoId) {
+        // Preserve all existing properties, only update specified fields
+        todos[i] = {
+          id: todos[i].id,
+          text: updates.text !== undefined ? updates.text : todos[i].text,
+          completed: updates.completed !== undefined ? updates.completed : todos[i].completed,
+          createdAt: todos[i].createdAt,
+          pageId: todos[i].pageId || 0,
+          priority: updates.priority !== undefined ? updates.priority : (todos[i].priority || "medium")
+        };
+        return true;
+      }
+    }
+    return false;
+  }
+
+  // Helper function to remove a todo by ID
+  function removeTodo(todoId) {
+    if (!pluginApi) {
+      Logger.e("Todo", "pluginApi is null, cannot delete todo");
+      return false;
+    }
+
+    var todos = pluginApi.pluginSettings.todos || [];
+    var indexToRemove = -1;
+
+    for (var i = 0; i < todos.length; i++) {
+      if (todos[i].id === todoId) {
+        indexToRemove = i;
+        break;
+      }
+    }
+
+    if (indexToRemove !== -1) {
+      todos.splice(indexToRemove, 1);
+
+      pluginApi.pluginSettings.todos = todos;
+      pluginApi.pluginSettings.count = todos.length;
+
+      // Recalculate completed count after removal
+      var completedCount = 0;
+      for (var j = 0; j < todos.length; j++) {
+        if (todos[j].completed) {
+          completedCount++;
+        }
+      }
+      pluginApi.pluginSettings.completedCount = completedCount;
+
+      pluginApi.saveSettings();
+      loadTodos(); // Reload the UI
+
+      return true;
+    } else {
+      Logger.e("Todo", "Todo with ID " + todoId + " not found for deletion");
+      return false;
+    }
+  }
+
+  // Helper function to toggle todo completion status
+  function toggleTodo(todoId, currentCompletedStatus) {
+    if (!pluginApi) {
+      Logger.e("Todo", "pluginApi is null, cannot toggle todo");
+      return false;
+    }
+
+    // Use the existing updateTodo function to update only the completion status
+    var success = updateTodo(todoId, {
+      completed: !currentCompletedStatus
+    });
+
+    if (success) {
+      pluginApi.pluginSettings.todos = pluginApi.pluginSettings.todos;
+
+      var completedCount = calculateCompletedCount();
+      pluginApi.pluginSettings.completedCount = completedCount;
+
+      moveTodoToCorrectPosition(todoId);
+
+      pluginApi.saveSettings();
+      loadTodos(); // Reload the UI
+      return true;
+    } else {
+      Logger.e("Todo", "Failed to toggle todo with ID " + todoId);
+      return false;
+    }
+  }
+
+  // Helper function to clear completed todos for the current page
+  function clearCompletedTodos() {
+    if (!pluginApi) {
+      Logger.e("Todo", "pluginApi is null, cannot clear completed todos");
+      return false;
+    }
+
+    var todos = pluginApi.pluginSettings.todos || [];
+    var currentPageId = pluginApi.pluginSettings.current_page_id || 0;
+
+    // Only clear completed todos for the current page
+    var activeTodos = todos.filter(function(todo) {
+      return !(todo.completed && todo.pageId === currentPageId);
+    });
+
+    pluginApi.pluginSettings.todos = activeTodos;
+
+    // Update counts
+    var newCompletedCount = 0;
+    for (var j = 0; j < activeTodos.length; j++) {
+      if (activeTodos[j].completed) {
+        newCompletedCount++;
+      }
+    }
+    pluginApi.pluginSettings.completedCount = newCompletedCount;
+    pluginApi.pluginSettings.count = activeTodos.length;
+
+    pluginApi.saveSettings();
+    loadTodos();
+    return true;
+  }
+
+  function calculateCompletedCount() {
+    if (!pluginApi) return 0;
+
+    var todos = pluginApi.pluginSettings.todos || [];
+    var completedCount = 0;
+    for (var j = 0; j < todos.length; j++) {
+      if (todos[j].completed) {
+        completedCount++;
+      }
+    }
+    return completedCount;
+  }
+
+  function findPageIndexInTodos(pageTodos, targetItem) {
+    for (var i = 0; i < pageTodos.length; i++) {
+      if (pageTodos[i].id === targetItem.id) {
+        return i;
+      }
+    }
+    return -1;
+  }
+
+  function moveTodoToCorrectPosition(todoId) {
+    if (!pluginApi) return;
+
+    var todos = pluginApi.pluginSettings.todos || [];
+    var currentPageId = pluginApi?.pluginSettings?.current_page_id || 0;
+
+    // Find the todo to move
+    var todoToMove = null;
+    var todoGlobalIndex = -1;
+
+    for (var i = 0; i < todos.length; i++) {
+      if (todos[i].id === todoId) {
+        todoToMove = todos[i];
+        todoGlobalIndex = i;
+        break;
+      }
+    }
+
+    if (todoToMove && todoGlobalIndex !== -1) {
+      // Remove the todo from its current position
+      todos.splice(todoGlobalIndex, 1);
+
+      // Only reorder within the same page
+      if (todoToMove.pageId === currentPageId) {
+        // Find the correct position within the same page
+        if (todoToMove.completed) {
+          // Place completed items at the end of the page
+          var insertIndex = todos.length;
+          for (var j = todos.length - 1; j >= 0; j--) {
+            if (todos[j].pageId === currentPageId && todos[j].completed) {
+              insertIndex = j + 1;
+              break;
+            }
+          }
+          todos.splice(insertIndex, 0, todoToMove);
+        } else {
+          // Place uncompleted items at the beginning of the page
+          var insertIndex = 0;
+          for (; insertIndex < todos.length; insertIndex++) {
+            if (todos[insertIndex].pageId === currentPageId) {
+              if (todos[insertIndex].completed) {
+                break;
+              }
+            }
+          }
+          todos.splice(insertIndex, 0, todoToMove);
+        }
+      } else {
+        // If the todo is not on the current page, just add it back to its original position
+        todos.splice(todoGlobalIndex, 0, todoToMove);
+      }
+
+      pluginApi.pluginSettings.todos = todos;
+      pluginApi.saveSettings();
+    }
+  }
+
+  // Helper function to get priority color
+  function getPriorityColor(priority) {
+    // Ensure priority is a valid string
+    if (!priority || typeof priority !== 'string') {
+      priority = "medium";
+    }
+
+    // Validate priority value
+    var validPriorities = ["high", "medium", "low"];
+    if (validPriorities.indexOf(priority) === -1) {
+      priority = "medium"; // Default to medium if invalid
+    }
+
+    // Simplified implementation using helper functions
+    if (!pluginApi) {
+      return getDefaultColor(priority);
+    }
+
+    var useCustomColors = pluginApi?.pluginSettings?.useCustomColors;
+    if (!useCustomColors) {
+      return getThemeColor(priority);
+    }
+
+    return getCustomColor(priority);
+  }
+
+  // Helper function to get default color when pluginApi is not available
+  function getDefaultColor(priority) {
+    if (priority === "high") {
+      return Color.mError;
+    } else if (priority === "low") {
+      return Color.mOnSurfaceVariant;
+    } else {
+      return Color.mPrimary;
+    }
+  }
+
+  // Helper function to get theme color when custom colors are disabled
+  function getThemeColor(priority) {
+    if (priority === "high") {
+      return Color.mError;
+    } else if (priority === "low") {
+      return Color.mOnSurfaceVariant;
+    } else {
+      return Color.mPrimary;
+    }
+  }
+
+  // Helper function to get custom color when custom colors are enabled
+  function getCustomColor(priority) {
+    var priorityColors = pluginApi?.pluginSettings?.priorityColors || {
+      "high": Color.mError,
+      "medium": Color.mPrimary,
+      "low": Color.mOnSurfaceVariant
+    };
+
+    if (priority === "high") {
+      return priorityColors.high || Color.mError;
+    } else if (priority === "low") {
+      return priorityColors.low || Color.mOnSurfaceVariant;
+    } else {
+      return priorityColors.medium || Color.mPrimary;
+    }
+  }
+
+  function loadTodos() {
+    // Store the current scroll position
+    var currentScrollPos = todoListView ? todoListView.contentY : 0;
+
+    todosModel.clear();
+    filteredTodosModel.clear();
+
+    var pluginTodos = root.rawTodos;
+    var currentPageId = pluginApi?.pluginSettings?.current_page_id || 0;
+
+    // Process todos in a single pass
+    var pageTodos = [];
+    var filteredPageTodos = [];
+
+    for (var i = 0; i < pluginTodos.length; i++) {
+      var todo = pluginTodos[i];
+      if (todo.pageId === currentPageId) {
+        var todoItem = {
+          id: todo.id,
+          text: todo.text,
+          completed: todo.completed === true,
+          createdAt: todo.createdAt,
+          pageId: todo.pageId,
+          priority: todo.priority || "medium"
+        };
+
+        pageTodos.push(todoItem);
+
+        if (showCompleted || !todo.completed) {
+          filteredPageTodos.push(todoItem);
+        }
+      }
+    }
+
+    // Populate models
+    for (var j = 0; j < pageTodos.length; j++) {
+      todosModel.append(pageTodos[j]);
+    }
+
+    for (var k = 0; k < filteredPageTodos.length; k++) {
+      filteredTodosModel.append(filteredPageTodos[k]);
+    }
+
+    // Restore the scroll position
+    if (todoListView) {
+      Qt.callLater(function() {
+        todoListView.contentY = currentScrollPos;
+      });
+    }
+
+    // Start the timer to delay checking if the model is empty
+    emptyStateTimer.start();
   }
 }
