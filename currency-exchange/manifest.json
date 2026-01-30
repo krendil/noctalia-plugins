@@ -3,7 +3,7 @@
   "name": "Currency Exchange",
   "version": "1.0.1",
   "description": "Currency conversion utility via launcher and bar widget",
-  "tags": ["Launcher", "Widget", "Utility"],
+  "tags": ["Launcher", "Utility"],
   "minNoctaliaVersion": "4.1.2",
   "author": "balor",
   "license": "MIT",
