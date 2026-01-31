@@ -3,18 +3,18 @@ import Quickshell
 import Quickshell.Io
 import qs.Commons
 import qs.Services.UI
-import qs.Services.Noctalia
+import qs.Services.Compositor
 
 Item {
   id: root
   property var pluginApi: null
-  property string compositor: ""
+
 
   Component.onCompleted: {
     logInfo("Main.qml Component.onCompleted - will parse once on first load");
     if (pluginApi && !parserStarted) {
       parserStarted = true;
-      detectCompositor();
+      runParser();
     }
   }
 
@@ -22,7 +22,7 @@ Item {
     logInfo("pluginApi changed");
     if (pluginApi && !parserStarted) {
       parserStarted = true;
-      detectCompositor();
+      runParser();
     }
   }
 
@@ -77,28 +77,20 @@ Item {
     parseDepthCounter = 0;
   }
 
-  function detectCompositor() {
-    // Use CompositorService for reliable compositor detection
-    if (CompositorService.isHyprland) {
-      compositor = "hyprland";
-      logInfo("Detected Hyprland compositor via CompositorService");
-    } else if (CompositorService.isNiri) {
-      compositor = "niri";
-      logInfo("Detected Niri compositor via CompositorService");
-    } else {
-      compositor = "unknown";
-      logError("No supported compositor detected (Hyprland/Niri)");
-      saveToDb([{
-        "title": "Error",
-        "binds": [{ "keys": "ERROR", "desc": "No supported compositor detected (Hyprland/Niri)" }]
-      }]);
+  // Refresh function - accessible from mainInstance
+  function refresh() {
+    logInfo("Refresh called - will re-parse");
+    if (!pluginApi) {
+      logError("Cannot refresh: pluginApi is null");
       return;
     }
-
-    if (pluginApi) {
-      pluginApi.pluginSettings.detectedCompositor = compositor;
-      pluginApi.saveSettings();
-    }
+    
+    // Reset parserStarted to allow re-parsing
+    parserStarted = false;
+    isCurrentlyParsing = false;
+    
+    // Now run parser
+    parserStarted = true;
     runParser();
   }
 
@@ -122,7 +114,21 @@ Item {
 
     isCurrentlyParsing = true;
     parseDepthCounter = 0;
-    logInfo("=== START PARSER for " + compositor + " ===");
+
+    // Detect compositor using CompositorService
+    if (CompositorService.isHyprland) {
+      logInfo("=== START PARSER for Hyprland ===");
+    } else if (CompositorService.isNiri) {
+      logInfo("=== START PARSER for Niri ===");
+    } else {
+      logError("No supported compositor detected (Hyprland/Niri)");
+      isCurrentlyParsing = false;
+      saveToDb([{
+        "title": "Error",
+        "binds": [{ "keys": "ERROR", "desc": "No supported compositor detected (Hyprland/Niri)" }]
+      }]);
+      return;
+    }
 
     var homeDir = Quickshell.env("HOME");
     if (!homeDir) {
@@ -142,21 +148,18 @@ Item {
     collectedBinds = {};
 
     var filePath;
-    if (compositor === "hyprland") {
+    if (CompositorService.isHyprland) {
       filePath = pluginApi?.pluginSettings?.hyprlandConfigPath || (homeDir + "/.config/hypr/hyprland.conf");
       filePath = filePath.replace(/^~/, homeDir);
-    } else if (compositor === "niri") {
+    } else if (CompositorService.isNiri) {
       filePath = pluginApi?.pluginSettings?.niriConfigPath || (homeDir + "/.config/niri/config.kdl");
       filePath = filePath.replace(/^~/, homeDir);
-    } else {
-      logError("Unknown compositor: " + compositor);
-      return;
     }
 
     logInfo("Starting with main config: " + filePath);
     filesToParse = [filePath];
 
-    if (compositor === "hyprland") {
+    if (CompositorService.isHyprland) {
       parseNextHyprlandFile();
     } else {
       parseNextNiriFile();
@@ -835,15 +838,11 @@ Item {
   IpcHandler {
     target: "plugin:keybind-cheatsheet"
 
-    // Note: "toggle" is now handled by built-in "togglePanel" action
-    // Use: qs -c "noctalia-shell" ipc call plugin togglePanel keybind-cheatsheet
-
-    function refresh() {
-      logInfo("IPC refresh called - triggering manual parse");
-      if (pluginApi) {
-        // Always re-detect compositor to ensure up-to-date detection
-        compositor = "";
-        detectCompositor();
+    function toggle() {
+      if (root.pluginApi) {
+        root.pluginApi.withCurrentScreen(screen => {
+          root.pluginApi.togglePanel(screen);
+        });
       }
     }
   }

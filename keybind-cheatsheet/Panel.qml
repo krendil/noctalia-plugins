@@ -5,6 +5,7 @@ import Quickshell
 import Quickshell.Io
 import qs.Commons
 import qs.Services.UI
+import qs.Services.Compositor
 import qs.Widgets
 
 Item {
@@ -22,8 +23,14 @@ Item {
   property int columnCount: cfg.columnCount ?? defaults.columnCount ?? 3
 
   property var rawCategories: pluginApi?.pluginSettings?.cheatsheetData || []
-  property var categories: processCategories(rawCategories)
-  property string compositor: pluginApi?.pluginSettings?.detectedCompositor || ""
+  property var categories: []
+  
+
+  
+  Component.onCompleted: {
+    categories = processCategories(rawCategories);
+  }
+
 
   // Dynamic column items (up to 4 columns)
   property var columnItems: []
@@ -168,9 +175,9 @@ Item {
         }
         NText {
           text: {
-            if (root.compositor === "hyprland") {
+            if (CompositorService.isHyprland) {
               return "Hyprland Keymap";
-            } else if (root.compositor === "niri") {
+            } else if (CompositorService.isNiri) {
               return "Niri Keymap";
             } else {
               return "Keymap";
@@ -373,7 +380,7 @@ Item {
     if (!cats || cats.length === 0) return [];
 
     // For Hyprland: split large workspace categories
-    if (compositor === "hyprland") {
+    if (CompositorService.isHyprland) {
       var result = [];
       for (var i = 0; i < cats.length; i++) {
         var cat = cats[i];
@@ -394,9 +401,9 @@ Item {
             }
           }
 
-          if (switching.length > 0) result.push({ title: "WORKSPACES - SWITCHING", binds: switching });
-          if (moving.length > 0) result.push({ title: "WORKSPACES - MOVING", binds: moving });
-          if (mouse.length > 0) result.push({ title: "WORKSPACES - MOUSE", binds: mouse });
+          if (switching.length > 0) result.push({ title: pluginApi?.tr("keybind-cheatsheet.panel.workspace-switching") || "WORKSPACES - SWITCHING", binds: switching });
+          if (moving.length > 0) result.push({ title: pluginApi?.tr("keybind-cheatsheet.panel.workspace-moving") || "WORKSPACES - MOVING", binds: moving });
+          if (mouse.length > 0) result.push({ title: pluginApi?.tr("keybind-cheatsheet.panel.workspace-mouse") || "WORKSPACES - MOUSE", binds: mouse });
         } else {
           result.push(cat);
         }

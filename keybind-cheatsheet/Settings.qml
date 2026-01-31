@@ -140,7 +140,7 @@ Item {
         }
 
         NText {
-          text: "px (400-3000)"
+          text: rootItem.pluginApi?.tr("keybind-cheatsheet.settings.width-range") || "px (400-3000)"
           color: Color.mOnSurfaceVariant
           pointSize: Style.fontSizeS
         }
@@ -159,7 +159,7 @@ Item {
 
         NToggle {
           id: autoHeightToggle
-          label: "Auto"
+          label: rootItem.pluginApi?.tr("keybind-cheatsheet.settings.auto-height") || "Auto"
           checked: root.autoHeight
           onToggled: function(checked) {
             root.autoHeight = checked;
@@ -188,7 +188,7 @@ Item {
         }
 
         NText {
-          text: "px (300-2000)"
+          text: rootItem.pluginApi?.tr("keybind-cheatsheet.settings.height-range") || "px (300-2000)"
           color: Color.mOnSurfaceVariant
           pointSize: Style.fontSizeS
           opacity: autoHeightToggle.checked ? 0.5 : 1.0
@@ -355,7 +355,7 @@ Item {
             color: Color.mPrimary
           }
           NText {
-            text: "Hyprland Path"
+            text: rootItem.pluginApi?.tr("keybind-cheatsheet.settings.hyprland-path") || "Hyprland Path"
             color: Color.mOnSurface
             pointSize: Style.fontSizeM
             font.weight: Style.fontWeightBold
@@ -404,7 +404,7 @@ Item {
             color: Color.mSecondary
           }
           NText {
-            text: "Niri Path"
+            text: rootItem.pluginApi?.tr("keybind-cheatsheet.settings.niri-path") || "Niri Path"
             color: Color.mOnSurface
             pointSize: Style.fontSizeM
             font.weight: Style.fontWeightBold
@@ -486,7 +486,6 @@ Item {
               rootItem.pluginApi.pluginSettings.hyprlandConfigPath = defaults.hyprlandConfigPath || "~/.config/hypr/hyprland.conf";
               rootItem.pluginApi.pluginSettings.niriConfigPath = defaults.niriConfigPath || "~/.config/niri/config.kdl";
               rootItem.pluginApi.pluginSettings.cheatsheetData = [];
-              rootItem.pluginApi.pluginSettings.detectedCompositor = "";
               rootItem.pluginApi.saveSettings();
 
               // Update UI

@@ -1,7 +1,13 @@
 {
   "keybind-cheatsheet": {
     "panel": {
-      "loading": "로딩 중..."
+      "loading": "로딩 중...",
+      "title": "키맵",
+      "title-hyprland": "Hyprland 키맵",
+      "title-niri": "Niri 키맵",
+      "workspace-switching": "작업공간 - 전환",
+      "workspace-moving": "작업공간 - 이동",
+      "workspace-mouse": "작업공간 - 마우스"
     },
     "settings": {
       "title": "키바인드 치트시트 설정",
@@ -29,7 +35,16 @@
       "keybind-example-hyprland": "Hyprland 예시: bind = $mod, F1, exec, qs -c \"noctalia-shell\" ipc call plugin togglePanel keybind-cheatsheet",
       "keybind-example-niri": "Niri 예시: Super+F1 { spawn \"qs\" \"-c\" \"noctalia-shell\" \"ipc\" \"call\" \"plugin\" \"togglePanel\" \"keybind-cheatsheet\"; }",
       "mod-var": "Mod 키 변수",
-      "mod-var-hint": "Super 키에 사용되는 변수 이름 (예: $mod 또는 $mainMod)."
+      "mod-var-hint": "Super 키에 사용되는 변수 이름 (예: $mod 또는 $mainMod).",
+      "width-range": "px (400-3000)",
+      "height-range": "px (300-2000)",
+      "hyprland-path": "Hyprland 경로",
+      "niri-path": "Niri 경로"
+    },
+    "barwidget": {
+      "tooltip": "키바인드 치트시트",
+      "open": "치트시트 열기",
+      "settings": "플러그인 설정"
     }
   }
 }
