@@ -29,6 +29,11 @@ Item {
         pluginApi.manifest.metadata.defaultSettings.mpvSocket || 
         "/tmp/mpv-socket"
 
+    // Thumbnail variables
+    readonly property string thumbCacheFolder: ImageCacheService.wpThumbDir + "mpvpaper"
+    property bool creatingThumb: false
+    property int _thumbGenIndex: 0
+
     function random() {
         if (wallpapersFolder === "" || folderModel.count === 0) {
             Logger.e("mpvpaper", "Empty wallpapers folder or no files found!");
@@ -62,6 +67,47 @@ Item {
 
         pluginApi.pluginSettings.active = isActive;
         pluginApi.saveSettings();
+    }
+
+    // Get thumbnail url based on video name
+    function getThumbUrl(videoPath: string): string {
+        const file = videoPath.split('/').pop();
+        const extension = file.split('.').pop();
+        const filename = file.replace('.' + extension, "");
+
+        return `file://${thumbCacheFolder}/${filename}.bmp`;
+    }
+
+    function thumbGeneration() {
+        root.creatingThumb = true;
+
+        while(root._thumbGenIndex < folderModel.count) {
+            const videoUrl = folderModel.get(root._thumbGenIndex, "fileUrl");
+            const thumbUrl = root.getThumbUrl(videoUrl);
+            root._thumbGenIndex++;
+
+            // Check if file already exists, otherwise create it with ffmpeg
+            if (thumbFolderModel.indexOf(thumbUrl) === -1) {
+                Logger.d("mpvpaper", `Creating thumbnail for video: ${videoUrl}`);
+
+                thumbProc.command = ["sh", "-c", `ffmpeg -y -i ${videoUrl} -frames:v 1 ${thumbUrl}`]
+                thumbProc.running = true;
+                return;
+            }
+        }
+
+        // The thumbnail generation has looped over every video and finished the generation.
+        root.creatingThumb = false;
+        root._thumbGenIndex = 0;
+    }
+
+    onWallpapersFolderChanged: {
+        // Reset variables
+        root._thumbGenIndex = 0;
+
+        // Clear and create the directory for the thumbnails
+        thumbProc.command = ["sh", "-c", `rm -rf ${thumbCacheFolder} && mkdir -p ${thumbCacheFolder}`]
+        thumbProc.running = true;
     }
 
     onCurrentWallpaperChanged: {
@@ -117,6 +163,24 @@ Item {
     Socket {
         id: socket
         path: root.mpvSocket
+    }
+
+    FolderListModel {
+        id: thumbFolderModel
+        folder: "file://" + root.thumbCacheFolder
+        nameFilters: ["*.bmp"]
+        showDirs: false
+    }
+
+    Process {
+        id: thumbProc
+        onRunningChanged: {
+            if (running)
+                return;
+
+            // Try to create the thumbnails if they don't exist.
+            root.thumbGeneration();
+        }
     }
 
     // IPC Handler
